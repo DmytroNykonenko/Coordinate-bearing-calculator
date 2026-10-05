@@ -134,3 +134,9 @@ Coordinate & Bearing Calculator — це двомовний (українськ�
 **English:** `LM`, `BM`, `SP`, and a continuous sequence of `TP1...TPn` are required. If `LM`, `BM`, `SP`, or any TP in the sequence is missing, the application displays an error and Excel generation is disabled. The calculation sequence is always `LM → BM → SP → TP1 → ... → TPn → SP`.
 
 **Українська:** `LM`, `BM`, `SP` та безперервна послідовність `TP1...TPn` є обов’язковими. Якщо відсутні `LM`, `BM`, `SP` або будь-яка TP у послідовності, застосунок показує помилку та не дозволяє генерувати Excel. Послідовність розрахунку завжди: `LM → BM → SP → TP1 → ... → TPn → SP`.
+
+## Point-name normalization / Нормалізація назв точок
+
+**English:** Point labels are normalized before validation. Spaces and common invisible Excel whitespace are ignored, and visually identical Cyrillic letters used accidentally in Latin labels are converted automatically. For example, `TP5` and `ТР5` are treated as the same point. `LM`, `BM`, and `SP` are still required. The app detects the highest TP number and checks the complete sequence from `TP1` to `TPn`, reporting all missing points at once.
+
+**Українська:** Перед перевіркою назви точок нормалізуються. Пробіли та типові невидимі символи Excel ігноруються, а випадково введені кириличні літери, які візуально схожі на латинські, автоматично замінюються. Наприклад, `TP5` і `ТР5` сприймаються як одна й та сама точка. `LM`, `BM` і `SP` залишаються обов'язковими. Апка визначає найбільший номер TP, перевіряє повну послідовність від `TP1` до `TPn` та показує всі відсутні точки одним повідомленням.

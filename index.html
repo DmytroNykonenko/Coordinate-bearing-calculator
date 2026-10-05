@@ -33,7 +33,23 @@ function tr(){document.documentElement.lang=lang;document.querySelectorAll('[dat
 ua.onclick=()=>{lang='uk';tr()};en.onclick=()=>{lang='en';tr()};
 window.addEventListener('error', e => { if (status) setStatus((lang==='uk'?'Помилка JavaScript: ':'JavaScript error: ') + (e.message || 'Unknown error'),'err'); });
 function setStatus(t,c=''){status.className='status '+c;status.textContent=t}
-function norm(v){return String(v??'').trim().toUpperCase().replace(/\s+/g,'')}
+function norm(v){
+  // Normalize point names so visually identical Cyrillic/Latin labels are accepted.
+  // Examples: TP5 = ТР5, LM = LМ, BM = BМ, SP = SР; spaces are ignored.
+  return String(v??'')
+    .trim()
+    .toUpperCase()
+    .replace(/[\s\u00A0\u2007\u202F\u200B\uFEFF]+/g,'')
+    .replace(/[Т]/g,'T')
+    .replace(/[Р]/g,'P')
+    .replace(/[М]/g,'M')
+    .replace(/[В]/g,'B')
+    .replace(/[С]/g,'C')
+    .replace(/[А]/g,'A')
+    .replace(/[Е]/g,'E')
+    .replace(/[О]/g,'O')
+    .replace(/[Х]/g,'X');
+}
 function xmlText(node){return node ? node.textContent : ''}
 async function readFirstSheet(arrayBuffer){
   if(typeof JSZip==='undefined') throw new Error(lang==='uk'?'Помилка: локальний Excel-модуль не завантажився.':'Error: local Excel module failed to load.');
@@ -89,8 +105,20 @@ async function writeXlsx(aoa,filename){
 }
 file.onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const data=await f.arrayBuffer();const a=await readFirstSheet(data);points=new Map();for(const r of a.slice(1)){const name=norm(r[0]),x=Number(r[1]),y=Number(r[2]);if(name&&Number.isFinite(x)&&Number.isFinite(y))points.set(name,{name,x,y})}validate();calculate();generate.disabled=false;setLoadedStatus();preview.hidden=false;render()}catch(err){points=null;generate.disabled=true;preview.hidden=true;setStatus(err?.message||I[lang].bad,'err')}};
 function getTPs(){return [...points.keys()].filter(x=>/^TP\d+$/.test(x)).sort((a,b)=>+a.slice(2)-+b.slice(2))}
-function setLoadedStatus(){const tps=getTPs();setStatus(I[lang].loaded(points.size,tps.length),'ok')}
-function validate(){const missing=[];if(!points.has('LM'))missing.push('LM');if(!points.has('BM'))missing.push('BM');if(!points.has('SP'))missing.push('SP');const tps=getTPs();if(!tps.length)missing.push('TP1…');if(missing.length)throw new Error(I[lang].missing(missing.join(', ')));for(let i=1;i<=tps.length;i++)if(!points.has('TP'+i))throw new Error(I[lang].missing('TP'+i))}
+function setLoadedStatus(){const tps=getTPs();const maxTp=tps.length?Math.max(...tps.map(x=>Number(x.slice(2)))):0;setStatus(I[lang].loaded(points.size,maxTp),'ok')}
+function validate(){
+  const missing=[];
+  if(!points.has('LM'))missing.push('LM');
+  if(!points.has('BM'))missing.push('BM');
+  if(!points.has('SP'))missing.push('SP');
+  const tps=getTPs();
+  if(!tps.length){missing.push('TP1…');}
+  else {
+    const maxTp=Math.max(...tps.map(x=>Number(x.slice(2))));
+    for(let i=1;i<=maxTp;i++) if(!points.has('TP'+i)) missing.push('TP'+i);
+  }
+  if(missing.length)throw new Error(I[lang].missing(missing.join(', ')));
+}
 function bearing(a,b){let d=Math.atan2(b.x-a.x,b.y-a.y)*180/Math.PI;return(d+360)%360}
 function dist(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
 function calculate(){const tps=getTPs();const pairs=[['LM','BM'],['BM','SP'],['SP','TP1']];for(let i=0;i<tps.length-1;i++)pairs.push([tps[i],tps[i+1]]);pairs.push([tps.at(-1),'SP']);const dec=Number(decl.value);rows=pairs.map(([f,t])=>{const a=points.get(f),b=points.get(t),tb=bearing(a,b),mb=(tb-dec+360)%360;return{from:f,to:t,mag:Math.round(mb),trueb:Math.round(tb),distance:Math.round(dist(a,b)),x:Math.round(a.x),y:Math.round(a.y)}});let sum=0;const poly=['SP',...tps].map(n=>points.get(n));for(let i=0;i<poly.length;i++){const p=poly[i],q=poly[(i+1)%poly.length];sum+=p.x*q.y-q.x*p.y}areaVal=Math.round(Math.abs(sum)/2)}
