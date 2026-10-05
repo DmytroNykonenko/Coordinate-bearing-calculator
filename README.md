@@ -120,3 +120,10 @@ Coordinate & Bearing Calculator — це двомовний (українськ�
 **English:** Version 4 uses explicit DOM element references instead of browser-created global variables. This improves compatibility with managed/corporate browsers and stricter browser security policies. The Excel ZIP library is stored locally in `libs/jszip.min.js`; no external CDN is required.
 
 **Українська:** Версія 4 використовує явні посилання на HTML-елементи замість автоматичних глобальних змінних браузера. Це покращує сумісність із корпоративними/керованими браузерами та суворішими політиками безпеки. Excel ZIP-бібліотека зберігається локально в `libs/jszip.min.js`; зовнішній CDN не потрібен.
+
+
+## Optional LM and BM / Необов’язкові LM та BM
+
+**English:** `LM` and `BM` are optional. `SP` and a continuous sequence of `TP1...TPn` are required. If LM and/or BM are absent, the application shows a warning and continues. If both exist, the route starts `LM → BM → SP`. If only LM exists, it starts `LM → SP`. If only BM exists, it starts `BM → SP`. If neither exists, calculation starts `SP → TP1 → ... → TPn → SP`.
+
+**Українська:** `LM` та `BM` є необов’язковими. Обов’язковими залишаються `SP` і безперервна послідовність `TP1...TPn`. Якщо LM та/або BM відсутні, додаток показує попередження, але продовжує роботу. Якщо є обидві точки, маршрут починається `LM → BM → SP`. Якщо є лише LM — `LM → SP`. Якщо є лише BM — `BM → SP`. Якщо немає обох — розрахунок починається `SP → TP1 → ... → TPn → SP`.
