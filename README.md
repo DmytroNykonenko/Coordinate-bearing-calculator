@@ -105,3 +105,11 @@ Coordinate & Bearing Calculator — це двомовний (українськ�
 
 ### Публікація на GitHub Pages
 Завантажте `index.html` та `README.md` у корінь GitHub-репозиторію. У **Settings → Pages** виберіть **Deploy from a branch**, гілку `main`, папку `/ (root)` та збережіть налаштування. Після цього GitHub опублікує додаток як статичний вебсайт.
+
+---
+
+## Offline dependency / Автономна залежність
+
+**EN:** Version 3 does not load the Excel-processing library from a public CDN. The required JavaScript ZIP module is stored locally in `libs/jszip.min.js`, and XLSX reading/writing is handled in the browser. This improves compatibility with corporate networks that block public CDNs. Keep the `libs` folder next to `index.html` when publishing the site.
+
+**UA:** Версія 3 не завантажує бібліотеку для обробки Excel із зовнішнього CDN. Необхідний JavaScript ZIP-модуль зберігається локально у `libs/jszip.min.js`, а читання та створення XLSX виконується безпосередньо у браузері. Це покращує роботу в корпоративних мережах, де зовнішні CDN можуть бути заблоковані. Під час публікації обов'язково залишайте папку `libs` поруч з `index.html`.
