@@ -113,3 +113,10 @@ Coordinate & Bearing Calculator — це двомовний (українськ�
 **EN:** Version 3 does not load the Excel-processing library from a public CDN. The required JavaScript ZIP module is stored locally in `libs/jszip.min.js`, and XLSX reading/writing is handled in the browser. This improves compatibility with corporate networks that block public CDNs. Keep the `libs` folder next to `index.html` when publishing the site.
 
 **UA:** Версія 3 не завантажує бібліотеку для обробки Excel із зовнішнього CDN. Необхідний JavaScript ZIP-модуль зберігається локально у `libs/jszip.min.js`, а читання та створення XLSX виконується безпосередньо у браузері. Це покращує роботу в корпоративних мережах, де зовнішні CDN можуть бути заблоковані. Під час публікації обов'язково залишайте папку `libs` поруч з `index.html`.
+
+
+## Browser compatibility / Сумісність браузерів
+
+**English:** Version 4 uses explicit DOM element references instead of browser-created global variables. This improves compatibility with managed/corporate browsers and stricter browser security policies. The Excel ZIP library is stored locally in `libs/jszip.min.js`; no external CDN is required.
+
+**Українська:** Версія 4 використовує явні посилання на HTML-елементи замість автоматичних глобальних змінних браузера. Це покращує сумісність із корпоративними/керованими браузерами та суворішими політиками безпеки. Excel ZIP-бібліотека зберігається локально в `libs/jszip.min.js`; зовнішній CDN не потрібен.

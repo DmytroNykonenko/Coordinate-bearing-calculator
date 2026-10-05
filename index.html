@@ -17,8 +17,21 @@
 <script>
 const I={uk:{title:'Калькулятор координат та азимутів',subtitle:'Excel → азимути, відстані, площа → готовий Excel',upload:'1. Завантажте Excel з координатами',columns:'Правило: 1-ша колонка — назва точки, 2-га — Easting/X, 3-тя — Northing/Y. Назви колонок можуть бути будь-які.',zone:'2. Система координат',decl:'3. Магнітне схилення',waiting:'Завантажте Excel-файл для початку.',generate:'Згенерувати Excel',preview:'Попередній перегляд',privacy:'Розрахунок виконується у вашому браузері. Файл координат не завантажується на сервер.',loaded:n=>`✓ Завантажено ${n} точок\n✓ LM, BM та SP знайдено\n✓ Знайдено TP1–TP${n-3}`,bad:'Помилка: перевірте структуру файлу та координати.',missing:x=>`Помилка: відсутні точки: ${x}`,area:x=>`Загальна площа / Total area: ${x} м²`},en:{title:'Coordinate & Bearing Calculator',subtitle:'Excel → bearings, distances, area → ready Excel',upload:'1. Upload coordinate Excel file',columns:'Rule: column 1 = point name, column 2 = Easting/X, column 3 = Northing/Y. Column headers may have any names.',zone:'2. Coordinate system',decl:'3. Magnetic declination',waiting:'Upload an Excel file to begin.',generate:'Generate Excel',preview:'Preview',privacy:'Calculations run in your browser. The coordinate file is not uploaded to a server.',loaded:n=>`✓ ${n} points loaded\n✓ LM, BM and SP detected\n✓ TP1–TP${n-3} detected`,bad:'Error: check the file structure and coordinate values.',missing:x=>`Error: missing points: ${x}`,area:x=>`Загальна площа / Total area: ${x} m²`}};
 let lang='uk', points=null, rows=null, areaVal=0;
+// Explicit DOM references for consistent behavior across browsers and corporate policies.
+const ua = document.getElementById('uk');
+const en = document.getElementById('en');
+const file = document.getElementById('file');
+const zone = document.getElementById('zone');
+const decl = document.getElementById('decl');
+const status = document.getElementById('status');
+const generate = document.getElementById('generate');
+const preview = document.getElementById('preview');
+const table = document.getElementById('table');
+const area = document.getElementById('area');
+
 function tr(){document.documentElement.lang=lang;document.querySelectorAll('[data-i]').forEach(e=>e.textContent=I[lang][e.dataset.i]);document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('active',b.id===lang));if(points) setStatus(I[lang].loaded(points.size),'ok');render();}
 ua.onclick=()=>{lang='uk';tr()};en.onclick=()=>{lang='en';tr()};
+window.addEventListener('error', e => { if (status) setStatus((lang==='uk'?'Помилка JavaScript: ':'JavaScript error: ') + (e.message || 'Unknown error'),'err'); });
 function setStatus(t,c=''){status.className='status '+c;status.textContent=t}
 function norm(v){return String(v??'').trim().toUpperCase().replace(/\s+/g,'')}
 function xmlText(node){return node ? node.textContent : ''}
