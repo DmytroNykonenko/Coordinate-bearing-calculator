@@ -44,3 +44,9 @@ The map preview converts the selected UTM coordinates to WGS84 for display on Op
 **EN:** The calculated site area remains visible in the web preview for geometry checking, but it is no longer included in the exported Excel workbook. The Excel output contains only the coordinate/bearing/distance table.
 
 **UA:** Розрахована площа ділянки залишається у веб-перегляді для перевірки геометрії, але більше не додається до експортованого Excel. Готовий Excel містить лише таблицю координат, азимутів і відстаней.
+
+
+## Map interaction / Робота з картою
+The map preview supports mouse/touch panning, mouse-wheel and +/- zoom, pinch zoom on touch devices, and a Fit to polygon button. Area is not displayed in the preview or exported Excel.
+
+Попередній перегляд карти підтримує переміщення мишею/дотиком, масштабування колесом та кнопками +/−, pinch zoom на сенсорних пристроях і кнопку «Показати весь полігон». Площа не відображається у Preview та не експортується в Excel.
