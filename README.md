@@ -1,52 +1,44 @@
-# Coordinate & Bearing Calculator / Калькулятор координат та азимутів
+# Coordinate & Bearing Calculator v12 / Калькулятор координат та азимутів
 
 ## English
-A browser-based tool for preparing coordinate/bearing tables from Excel. The input file may use any column headers: column 1 is the point name, column 2 is Easting/X, and column 3 is Northing/Y.
+Browser-based bilingual coordinate calculator with an interactive OpenStreetMap preview. All input data are processed locally in the browser.
 
-### Required points
-- **SP** and a continuous sequence **TP1...TPn** are required.
-- **LM** and **BM** are optional.
-- If both LM and BM exist, the calculation sequence starts `LM → BM → SP`. If only one exists, it connects directly to SP. If neither exists, the sequence starts at SP.
-- Area is always calculated only from `SP → TP1 → ... → TPn → SP`; LM/BM never affect area.
+### Input Excel
+- Column 1: point name; column 2: UTM Easting; column 3: UTM Northing. Column headers can be anything.
+- Place **LM** and/or **BM** anywhere in the file if available; both are optional and shared by all polygons.
+- Each **SP** begins a new polygon. Its following **TP1, TP2, ... TPn** rows belong to that polygon until the next SP. TP numbering restarts at TP1 for each polygon.
+- Point names are normalized for Cyrillic/Latin lookalikes and whitespace.
+- Each polygon must have consecutive TP numbers (at least TP1 and TP2); rows must be grouped by polygon.
 
-### Workflow
-1. Upload an `.xlsx` file.
-2. Select WGS 1984 UTM Zone 36N or 37N.
-3. Select magnetic declination (8° or 9°).
-4. Review the generated table and map preview.
-5. Click **Generate Excel** to download the result.
+### Usage
+1. Open `index.html` or the GitHub Pages website.
+2. Upload the Excel file and choose WGS 1984 UTM Zone 36N/37N and magnetic declination 8°/9°.
+3. Review the bilingual bearing/distance table and independent colored polygons on the interactive map. Zoom, pan or fit all polygons.
+4. Download one Excel workbook with a single sheet, section headers **Polygon 1**, **Polygon 2**, etc. No area is displayed or exported.
 
-The map preview converts the selected UTM coordinates to WGS84 for display on OpenStreetMap tiles. Bearing, distance, and area calculations continue to use the original UTM coordinates. Excel processing is performed locally in the browser.
+Shared LM→BM is calculated once (if both exist). For each polygon, BM→SP or LM→SP is calculated when the relevant reference point exists. No artificial links connect separate polygon boundaries.
 
----
+**Note:** bearings are UTM grid bearings; the displayed “True bearing” column follows the previous calculator's grid-based convention, without meridian-convergence correction.
 
 ## Українська
-Браузерний інструмент для підготовки таблиць координат, азимутів і відстаней з Excel. Назви колонок можуть бути будь-якими: 1-ша колонка — назва точки, 2-га — Easting/X, 3-тя — Northing/Y.
+Двомовний браузерний калькулятор координат із інтерактивною картою OpenStreetMap. Дані обробляються локально у браузері.
 
-### Обов'язкові точки
-- **SP** та безперервна послідовність **TP1...TPn** є обов'язковими.
-- **LM** і **BM** — необов'язкові.
-- Якщо є LM і BM, послідовність починається `LM → BM → SP`. Якщо є лише одна з них, вона напряму з'єднується з SP. Якщо немає обох — розрахунок починається з SP.
-- Площа завжди рахується тільки по контуру `SP → TP1 → ... → TPn → SP`; LM/BM на площу не впливають.
+### Вхідний Excel
+- Колонка 1 — назва точки, колонка 2 — UTM Easting, колонка 3 — UTM Northing. Заголовки можуть бути довільними.
+- **LM** і **BM** необов'язкові та спільні для всіх полігонів.
+- Кожен **SP** починає новий полігон. Наступні **TP1, TP2, ... TPn** належать йому до наступного SP. Нумерація TP починається заново в кожному полігоні.
+- Назви точок нормалізуються (латиниця/кирилиця, пробіли).
+- Для кожного полігону потрібна безперервна послідовність TP (щонайменше TP1 і TP2). Точки полігонів мають бути згруповані.
 
 ### Послідовність роботи
-1. Завантажте `.xlsx`.
-2. Оберіть WGS 1984 UTM Zone 36N або 37N.
-3. Оберіть магнітне схилення (8° або 9°).
-4. Перевірте готову таблицю та візуалізацію на карті.
-5. Натисніть **Згенерувати Excel**.
+1. Відкрийте `index.html` або сайт GitHub Pages.
+2. Завантажте Excel, оберіть WGS 1984 UTM Zone 36N/37N і магнітне схилення 8°/9°.
+3. Перевірте таблицю азимутів/відстаней і окремі кольорові полігони на інтерактивній карті. Можна масштабувати, рухати та показувати всі полігони.
+4. Завантажте один Excel із заголовками **Полігон 1**, **Полігон 2** тощо в одній таблиці. Площа ніде не виводиться.
 
-Для карти координати з обраної UTM-зони тимчасово перетворюються у WGS84 та відображаються на підкладці OpenStreetMap. Азимути, відстані та площа продовжують рахуватися за вихідними UTM-координатами. Обробка Excel виконується локально у браузері.
+Спільний перехід LM→BM обчислюється один раз (якщо є обидві точки). Для кожного полігону обчислюється BM→SP або LM→SP за наявності контрольної точки. Штучних переходів між контурами немає.
 
+**Примітка:** азимути обчислюються за координатною сіткою UTM; колонка «Істинний азимут» зберігає попередню логіку калькулятора без поправки на зближення меридіанів.
 
-## v10 / Версія v10
-
-**EN:** The calculated site area remains visible in the web preview for geometry checking, but it is no longer included in the exported Excel workbook. The Excel output contains only the coordinate/bearing/distance table.
-
-**UA:** Розрахована площа ділянки залишається у веб-перегляді для перевірки геометрії, але більше не додається до експортованого Excel. Готовий Excel містить лише таблицю координат, азимутів і відстаней.
-
-
-## Map interaction / Робота з картою
-The map preview supports mouse/touch panning, mouse-wheel and +/- zoom, pinch zoom on touch devices, and a Fit to polygon button. Area is not displayed in the preview or exported Excel.
-
-Попередній перегляд карти підтримує переміщення мишею/дотиком, масштабування колесом та кнопками +/−, pinch zoom на сенсорних пристроях і кнопку «Показати весь полігон». Площа не відображається у Preview та не експортується в Excel.
+### GitHub Pages
+Upload `index.html`, `README.md`, and `libs/jszip.min.js` to the repository root (with the JS file inside `libs/`). Enable Settings → Pages → Deploy from a branch → main → /(root).
