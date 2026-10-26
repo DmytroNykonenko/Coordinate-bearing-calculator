@@ -42,3 +42,10 @@ Shared LM→BM is calculated once (if both exist). For each polygon, BM→SP or 
 
 ### GitHub Pages
 Upload `index.html`, `README.md`, and `libs/jszip.min.js` to the repository root (with the JS file inside `libs/`). Enable Settings → Pages → Deploy from a branch → main → /(root).
+
+
+## v13 — Basemap switcher / Перемикач підкладки
+
+**English:** The interactive map defaults to **Satellite Imagery (Esri World Imagery)**. Use the **Basemap** dropdown above the map to switch to **OpenStreetMap** without changing the polygons, point labels, current zoom, or pan position. Satellite and OSM tiles require internet access to their respective providers. Attribution is shown on the map. Bearings, distances and Excel export are unaffected.
+
+**Українська:** За замовчуванням карта використовує **супутникові знімки Esri World Imagery**. У меню **Підкладка** над картою можна переключитися на **OpenStreetMap** без зміни полігонів, підписів, масштабу та положення карти. Для обох підкладок потрібен доступ до відповідних картографічних серверів. Атрибуція відображається на карті. Розрахунки та експорт Excel не змінюються.
