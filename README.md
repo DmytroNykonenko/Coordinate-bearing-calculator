@@ -49,3 +49,16 @@ Upload `index.html`, `README.md`, and `libs/jszip.min.js` to the repository root
 **English:** The interactive map defaults to **Satellite Imagery (Esri World Imagery)**. Use the **Basemap** dropdown above the map to switch to **OpenStreetMap** without changing the polygons, point labels, current zoom, or pan position. Satellite and OSM tiles require internet access to their respective providers. Attribution is shown on the map. Bearings, distances and Excel export are unaffected.
 
 **Українська:** За замовчуванням карта використовує **супутникові знімки Esri World Imagery**. У меню **Підкладка** над картою можна переключитися на **OpenStreetMap** без зміни полігонів, підписів, масштабу та положення карти. Для обох підкладок потрібен доступ до відповідних картографічних серверів. Атрибуція відображається на карті. Розрахунки та експорт Excel не змінюються.
+
+
+## v14 — Image / OCR input (English)
+
+In addition to XLSX, select **Image / OCR** and upload one or more PNG, JPG or WebP screenshots of a coordinate table. Click **Recognize**, inspect the editable review table, correct any mistaken digits or point labels, and click **Apply coordinates**. The existing preview, map and Excel export then use the verified coordinates. Each new `SP` begins a separate polygon. `LM` and `BM` are optional shared points.
+
+OCR uses Tesseract.js and downloads the recognition engine/model from external services when first used; Internet access is required. Images are processed in the browser, not uploaded to our server. Accuracy is not guaranteed. Always compare coordinates with the original image. Missing rows can be added manually, and the raw OCR text can be edited/reparsed. A cropped table may omit SP; do not invent missing coordinates.
+
+## v14 — Завантаження зображень / OCR (Українська)
+
+Окрім XLSX, можна вибрати **Image / OCR** і завантажити одне або кілька зображень таблиці у форматі PNG, JPG або WebP. Натисніть **Розпізнати зображення**, перевірте та за потреби виправте назви точок і координати у редагованій таблиці, після чого натисніть **Підтвердити координати**. Після цього працюють звичайні Preview, карта й експорт Excel. Кожна нова `SP` починає окремий полігон. `LM` і `BM` — необов'язкові спільні точки.
+
+Для OCR використовується Tesseract.js, який під час першого запуску завантажує бібліотеку та модель із зовнішніх ресурсів. Потрібне інтернет-з'єднання. Обробка зображень відбувається в браузері, без надсилання на наш сервер. OCR може помилятися — **обов'язково звіряйте координати з оригіналом**. Відсутні рядки можна додати вручну, а розпізнаний текст відредагувати й повторно розібрати. Якщо на фото немає SP, координати SP потрібно надати окремо.
