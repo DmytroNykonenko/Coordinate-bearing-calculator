@@ -173,8 +173,38 @@ async function prepareOcrImage(file){
  for(let i=0;i<data.data.length;i+=4){const g=Math.round(.299*data.data[i]+.587*data.data[i+1]+.114*data.data[i+2]);const v=g<175?0:255;data.data[i]=data.data[i+1]=data.data[i+2]=v;}
  ctx.putImageData(data,0,0);return canvas;
 }
+// v16: recognize three column strips separately, align their OCR words by vertical position.
+function cropStrip(canvas,left,right){const out=document.createElement('canvas');out.width=Math.max(1,Math.round(canvas.width*(right-left)));out.height=canvas.height;out.getContext('2d').drawImage(canvas,Math.round(canvas.width*left),0,out.width,canvas.height,0,0,out.width,out.height);return out}
+function wordsFromTsv(tsv){if(!tsv)return [];const lines=tsv.split(/\r?\n/),header=lines.shift().split('\t');const idx=k=>header.indexOf(k),out=[];for(const l of lines){const a=l.split('\t'),t=(a[idx('text')]||'').trim();if(!t)continue;const y=+a[idx('top')],h=+a[idx('height')],x=+a[idx('left')];if(Number.isFinite(y))out.push({t,y:y+h/2,x,conf:+a[idx('conf')]||0})}return out}
+function groupWords(words,tol=17){words.sort((a,b)=>a.y-b.y||a.x-b.x);const groups=[];for(const w of words){let g=groups.find(g=>Math.abs(g.y-w.y)<tol);if(!g){g={y:w.y,words:[]};groups.push(g)}g.words.push(w);g.y=g.words.reduce((a,b)=>a+b.y,0)/g.words.length}return groups.sort((a,b)=>a.y-b.y).map(g=>({y:g.y,text:g.words.sort((a,b)=>a.x-b.x).map(w=>w.t).join(' ')}))}
+function cleanPoint(t){const m=String(t).toUpperCase().replace(/[Т]/g,'T').replace(/[Р]/g,'P').replace(/[М]/g,'M').replace(/[В]/g,'B').replace(/[Ѕ]/g,'S').replace(/\s/g,'').match(/(?:LM|BM|SP|TP[0-9OОIl|]{1,3})/);return m?norm(m[0].replace(/[OО]/g,'0').replace(/[Il|]/g,'1')):null}
+function cleanCoord(t,digits){const tokens=String(t).replace(/[OО]/g,'0').replace(/[Il|]/g,'1').match(/\d+/g)||[];return tokens.find(x=>x.length===digits)||null}
+function joinByY(names,xs,ys){const out=[],usedX=new Set(),usedY=new Set();for(const n of names){const name=cleanPoint(n.text);if(!name)continue;function closest(rows,used){let best=-1,delta=Infinity;rows.forEach((r,i)=>{const d=Math.abs(r.y-n.y);if(!used.has(i)&&d<delta){delta=d;best=i}});return delta<27?best:-1}const xi=closest(xs,usedX),yi=closest(ys,usedY);if(xi<0||yi<0)continue;const x=cleanCoord(xs[xi].text,6),y=cleanCoord(ys[yi].text,7);if(x&&y){out.push([name,x,y]);usedX.add(xi);usedY.add(yi)}}return out}
+async function recognizeByColumns(worker,canvas){
+ // Table screenshot columns: From, To, bearings, distance, Easting, Northing.
+ // Detect a table's approximate left/right extent from dark vertical grid lines.
+ const w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d'),data=ctx.getImageData(0,0,w,h).data;
+ const hist=[];for(let x=0;x<w;x+=2){let count=0;for(let y=0;y<h;y+=5){const i=(y*w+x)*4;if(data[i]<110)count++}hist.push({x,count})}
+ const candidates=hist.filter(a=>a.count>h/5/2.5).map(a=>a.x);
+ const clusters=[];for(const x of candidates){const last=clusters.at(-1);if(last&&x-last.at(-1)<9)last.push(x);else clusters.push([x])}
+ const verticals=clusters.map(a=>a[Math.floor(a.length/2)]).filter(x=>x>w*.01&&x<w*.99);
+ let bounds;
+ if(verticals.length>=7){const left=verticals[0],right=verticals.at(-1),step=(right-left)/7;bounds=[left,left+step,left+2*step,right-2*step,right-step,right]}else{bounds=[w*.02,w*.14,w*.25,w*.75,w*.86,w*.98]}
+ // Default proportional strips are safer if irregular column widths.
+ const strips=[[.02,.145],[.73,.865],[.865,.995]];
+ const results=[];
+ for(let i=0;i<3;i++){
+  const part=cropStrip(canvas,...strips[i]);
+  await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
+  const r=await worker.recognize(part,{}, {tsv:true,text:true});
+  const words=wordsFromTsv(r.data.tsv);const rows=groupWords(words,Math.max(12,Math.round(canvas.height/85)));
+  results.push({rows,text:r.data.text||''});
+ }
+ const aligned=joinByY(results[0].rows,results[1].rows,results[2].rows);
+ return {records:aligned,debug:results.map((r,i)=>['FROM','EASTING','NORTHING'][i]+' COLUMN:\n'+r.text).join('\n\n')};
+}
 function addReviewRow(r=['','','']){const tr=document.createElement('tr');for(let i=0;i<3;i++){const td=document.createElement('td'),inp=document.createElement('input');inp.value=r[i]??'';inp.setAttribute('aria-label',['Point','Easting','Northing'][i]);td.appendChild(inp);tr.appendChild(td)}const td=document.createElement('td'),b=document.createElement('button');b.type='button';b.textContent='×';b.title='Remove row';b.onclick=()=>tr.remove();td.appendChild(b);tr.appendChild(td);ocrRows.appendChild(tr)}
-function showReview(data){ocrRows.replaceChildren();data.forEach(addReviewRow);ocrReview.hidden=false;ocrProgress.textContent=(lang==='uk'?`Знайдено рядків: ${data.length}. Перевірте всі координати та додайте відсутні точки.`:`Rows found: ${data.length}. Check every coordinate and add missing points.`)}
+function showReview(data){ocrRows.replaceChildren();data.forEach(addReviewRow);ocrReview.hidden=false;ocrProgress.textContent=(lang==='uk'?`Знайдено рядків: ${data.length}. Обов’язково перевірте координати перед підтвердженням.`:`Rows found: ${data.length}. Check every coordinate and add missing points.`)}
 document.getElementById('addOcrRow').onclick=()=>addReviewRow();
 document.getElementById('parseOcrText').onclick=()=>showReview(parseCoordinateLines(ocrText.value));
 document.getElementById('applyOcr').onclick=()=>{try{const data=[...ocrRows.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('input')].map(x=>x.value.trim())).filter(r=>r.some(Boolean));if(!data.length)throw new Error('No coordinate rows.');loadPointRecords(data);ocrProgress.textContent=lang==='uk'?'✓ Координати підтверджено':'✓ Coordinates confirmed'}catch(e){inputError(e)}};
@@ -187,8 +217,8 @@ recognize.onclick=async()=>{const files=[...imageFiles.files];if(!files.length){
  let worker=null;try{
   const T=await loadTesseract();ocrProgress.textContent=lang==='uk'?'Завантаження OCR-моделі…':'Loading OCR model…';
   worker=await T.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text')ocrProgress.textContent=`OCR: ${Math.round((m.progress||0)*100)}%`}});
-  const texts=[];for(let i=0;i<files.length;i++){ocrProgress.textContent=`OCR ${i+1}/${files.length}: ${files[i].name}`;const prepared=await prepareOcrImage(files[i]);await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});const result=await worker.recognize(prepared);texts.push(result.data.text)}
-  ocrText.value=texts.join('\n');showReview(parseCoordinateLines(ocrText.value));
+  const texts=[],records=[];for(let i=0;i<files.length;i++){ocrProgress.textContent=`OCR ${i+1}/${files.length}: ${files[i].name}`;const prepared=await prepareOcrImage(files[i]);const result=await recognizeByColumns(worker,prepared);texts.push(result.debug);records.push(...result.records)}
+  ocrText.value=texts.join('\n\n');showReview(records);if(records.length<3)ocrProgress.textContent=(lang==='uk'?'⚠ Розпізнано замало точок. Спробуйте окремі чіткі знімки кожної сторінки або виправте таблицю вручну.':'⚠ Too few points recognized. Try clear separate images for each page or edit rows manually.');
  }catch(e){ocrProgress.textContent=(lang==='uk'?'Помилка OCR: ':'OCR error: ')+e.message+'\n'+(lang==='uk'?'Можна вручну вставити текст у поле перевірки.':'You can paste text manually into the review area.');ocrReview.hidden=false}
  finally{if(worker)await worker.terminate().catch(()=>{});recognize.disabled=false}
 };

@@ -69,3 +69,10 @@ OCR uses Tesseract.js and downloads the recognition engine/model from external s
 English: The OCR input is enlarged and converted to high-contrast monochrome before recognition. The parser expects `From / To / Magnetic / True / Distance / Easting / Northing` and extracts only the `From` point and its UTM coordinates. Ambiguous lines are omitted, never guessed. Review all rows and manually add missing coordinates before applying.
 
 Українська: Перед розпізнаванням зображення збільшується й переводиться у висококонтрастний чорно-білий вигляд. Парсер обробляє формат `Від / До / Магнітний / Істинний / Відстань / UTMX / UTMY`, беручи назву з колонки «Від». Неоднозначні рядки пропускаються, а не вгадуються. Обов'язково перевірте всі рядки й додайте пропущені координати вручну.
+
+
+## v16 — Column-based OCR / OCR за колонками
+
+**English:** Image OCR now scans the point-name, Easting and Northing columns separately and matches values by their vertical position. Upload each page as a separate image when possible. Always review all detected coordinates. Column locations assume a standard seven-column table and may need adjustment for differently cropped screenshots. Recognition may be incomplete.
+
+**Українська:** OCR окремо розпізнає колонки назв точок, Easting і Northing та зіставляє значення за висотою рядків. Бажано завантажувати кожну сторінку окремим зображенням. Обов’язково перевіряйте всі координати. Розташування колонок розраховане на стандартну таблицю із семи колонок і може потребувати налаштування для інших зображень. Розпізнавання може бути неповним.
