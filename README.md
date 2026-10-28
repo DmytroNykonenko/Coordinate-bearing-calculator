@@ -49,30 +49,3 @@ Upload `index.html`, `README.md`, and `libs/jszip.min.js` to the repository root
 **English:** The interactive map defaults to **Satellite Imagery (Esri World Imagery)**. Use the **Basemap** dropdown above the map to switch to **OpenStreetMap** without changing the polygons, point labels, current zoom, or pan position. Satellite and OSM tiles require internet access to their respective providers. Attribution is shown on the map. Bearings, distances and Excel export are unaffected.
 
 **Українська:** За замовчуванням карта використовує **супутникові знімки Esri World Imagery**. У меню **Підкладка** над картою можна переключитися на **OpenStreetMap** без зміни полігонів, підписів, масштабу та положення карти. Для обох підкладок потрібен доступ до відповідних картографічних серверів. Атрибуція відображається на карті. Розрахунки та експорт Excel не змінюються.
-
-
-## v14 — Image / OCR input (English)
-
-In addition to XLSX, select **Image / OCR** and upload one or more PNG, JPG or WebP screenshots of a coordinate table. Click **Recognize**, inspect the editable review table, correct any mistaken digits or point labels, and click **Apply coordinates**. The existing preview, map and Excel export then use the verified coordinates. Each new `SP` begins a separate polygon. `LM` and `BM` are optional shared points.
-
-OCR uses Tesseract.js and downloads the recognition engine/model from external services when first used; Internet access is required. Images are processed in the browser, not uploaded to our server. Accuracy is not guaranteed. Always compare coordinates with the original image. Missing rows can be added manually, and the raw OCR text can be edited/reparsed. A cropped table may omit SP; do not invent missing coordinates.
-
-## v14 — Завантаження зображень / OCR (Українська)
-
-Окрім XLSX, можна вибрати **Image / OCR** і завантажити одне або кілька зображень таблиці у форматі PNG, JPG або WebP. Натисніть **Розпізнати зображення**, перевірте та за потреби виправте назви точок і координати у редагованій таблиці, після чого натисніть **Підтвердити координати**. Після цього працюють звичайні Preview, карта й експорт Excel. Кожна нова `SP` починає окремий полігон. `LM` і `BM` — необов'язкові спільні точки.
-
-Для OCR використовується Tesseract.js, який під час першого запуску завантажує бібліотеку та модель із зовнішніх ресурсів. Потрібне інтернет-з'єднання. Обробка зображень відбувається в браузері, без надсилання на наш сервер. OCR може помилятися — **обов'язково звіряйте координати з оригіналом**. Відсутні рядки можна додати вручну, а розпізнаний текст відредагувати й повторно розібрати. Якщо на фото немає SP, координати SP потрібно надати окремо.
-
-
-## v15 — OCR improvements / Покращення OCR
-
-English: The OCR input is enlarged and converted to high-contrast monochrome before recognition. The parser expects `From / To / Magnetic / True / Distance / Easting / Northing` and extracts only the `From` point and its UTM coordinates. Ambiguous lines are omitted, never guessed. Review all rows and manually add missing coordinates before applying.
-
-Українська: Перед розпізнаванням зображення збільшується й переводиться у висококонтрастний чорно-білий вигляд. Парсер обробляє формат `Від / До / Магнітний / Істинний / Відстань / UTMX / UTMY`, беручи назву з колонки «Від». Неоднозначні рядки пропускаються, а не вгадуються. Обов'язково перевірте всі рядки й додайте пропущені координати вручну.
-
-
-## v16 — Column-based OCR / OCR за колонками
-
-**English:** Image OCR now scans the point-name, Easting and Northing columns separately and matches values by their vertical position. Upload each page as a separate image when possible. Always review all detected coordinates. Column locations assume a standard seven-column table and may need adjustment for differently cropped screenshots. Recognition may be incomplete.
-
-**Українська:** OCR окремо розпізнає колонки назв точок, Easting і Northing та зіставляє значення за висотою рядків. Бажано завантажувати кожну сторінку окремим зображенням. Обов’язково перевіряйте всі координати. Розташування колонок розраховане на стандартну таблицю із семи колонок і може потребувати налаштування для інших зображень. Розпізнавання може бути неповним.

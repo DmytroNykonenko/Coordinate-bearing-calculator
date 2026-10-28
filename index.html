@@ -6,13 +6,12 @@
 <script src="./libs/jszip.min.js"></script>
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#182230;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1050px;margin:36px auto;padding:0 20px}.card{background:#fff;border:1px solid #dde4ee;border-radius:18px;box-shadow:0 12px 35px rgba(31,45,61,.08);overflow:hidden}.head{padding:28px 32px;background:#17324d;color:#fff;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.head h1{margin:0 0 8px;font-size:28px}.head p{margin:0;color:#d9e5ef}.lang{display:flex;border:1px solid #6d8499;border-radius:10px;overflow:hidden;flex:none}.lang button{border:0;padding:9px 12px;background:transparent;color:#fff;cursor:pointer}.lang button.active{background:#fff;color:#17324d}.body{padding:30px 32px}.grid{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:18px}.field label{font-weight:700;display:block;margin-bottom:8px}.field small{display:block;color:#697586;margin-top:6px}.drop{border:2px dashed #b7c4d3;border-radius:12px;padding:20px;background:#f8fafc;min-height:92px}.drop input{width:100%}select{width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:0 10px;background:#fff;font-size:15px}.status{margin-top:22px;border-radius:12px;padding:14px 16px;background:#f4f7fb;color:#4a5868;white-space:pre-line}.status.ok{background:#edf8f1;color:#17633a}.status.err{background:#fff0f0;color:#9f2626}.status.warn{background:#fff8e6;color:#805b00}.actions{display:flex;gap:12px;align-items:center;margin-top:22px}.primary{border:0;border-radius:10px;background:#17324d;color:white;font-weight:700;padding:13px 20px;cursor:pointer;font-size:15px}.primary:disabled{opacity:.45;cursor:not-allowed}.preview{margin-top:28px;overflow:auto}.preview h2{font-size:18px}.preview table{width:100%;border-collapse:collapse;min-width:820px}.preview th,.preview td{border:1px solid #d6dee8;padding:8px;text-align:center}.preview th{background:#e9eef5;font-size:13px}.preview .section-row td{background:#dfeaf5;text-align:left;font-weight:800;padding:10px 14px}.mapcontrols{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.basemap-select{width:auto;min-width:145px;height:36px;font-size:13px;border:1px solid #b9c5d1;border-radius:8px;background:#fff;padding:0 9px}.mapbtn{border:1px solid #b9c5d1;border-radius:8px;background:#fff;padding:8px 11px;cursor:pointer;font-weight:700}.mapbtn:hover{background:#f4f7fb}.mapframe{touch-action:none;cursor:grab}.mapframe.dragging{cursor:grabbing}.mapbox{margin-top:24px}.maphead{display:flex;justify-content:space-between;align-items:center;gap:12px}.mapframe{height:460px;border:1px solid #d6dee8;border-radius:12px;overflow:hidden;background:#eef2f5;position:relative}.mapframe svg{width:100%;height:100%;display:block}.mapnote{font-size:12px;color:#738092;margin-top:7px}.foot{font-size:12px;color:#738092;margin-top:20px}@media(max-width:780px){.grid{grid-template-columns:1fr}.head{flex-direction:column}.body,.head{padding:22px}}
-.source-tabs{display:flex;gap:5px;margin-bottom:9px}.source-tabs button{padding:7px 12px;border:1px solid #b9c5d1;background:white;border-radius:8px;cursor:pointer}.source-tabs button.active{background:#17324d;color:white}.ocr-review{margin-top:20px;border:1px solid #d6dee8;border-radius:12px;padding:15px}.ocr-review h2{font-size:17px}.review-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}.review-scroll{max-height:360px;overflow:auto}.review-table{width:100%;border-collapse:collapse}.review-table th,.review-table td{padding:5px;border:1px solid #d6dee8}.review-table input{width:100%;min-width:80px;padding:7px;border:1px solid #bac6d2;border-radius:5px}.review-table input:invalid{border-color:#bb3333}.review-table button{border:0;background:#fff0f0;color:#9f2626;padding:6px;cursor:pointer}.ocr-review details{margin-top:12px}.ocr-review textarea{margin-top:8px;font-family:monospace}#ocrProgress{white-space:pre-line}
 </style>
-</head><body><div class="wrap"><div class="card"><header class="head"><div><h1 data-i="title">Калькулятор координат та азимутів</h1><p data-i="subtitle">Excel / Image → азимути та відстані → готовий Excel</p></div><div class="lang"><button id="ua" class="active">UA</button><button id="en">EN</button></div></header><main class="body"><div class="grid">
-<div class="field"><label data-i="upload">1. Завантажте Excel з координатами</label><div class="source-tabs"><button id="excelTab" class="active" type="button">Excel</button><button id="imageTab" type="button">Image / OCR</button></div><div class="drop"><div id="excelInput"><input id="file" type="file" accept=".xlsx"><small data-i="columns">Правило: 1-ша колонка — назва точки, 2-га — Easting/X, 3-тя — Northing/Y. Назви колонок можуть бути будь-які.</small></div><div id="imageInput" hidden><input id="imageFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple><small id="imageHelp">PNG/JPG/WebP · Завантажте всі частини таблиці, потім перевірте координати.</small><div style="margin-top:10px"><button class="mapbtn" id="recognize" type="button">Розпізнати зображення / Recognize</button></div><div id="ocrProgress" class="mapnote" role="status"></div></div></div></div>
+</head><body><div class="wrap"><div class="card"><header class="head"><div><h1 data-i="title">Калькулятор координат та азимутів</h1><p data-i="subtitle">Excel → азимути, відстані, площа → готовий Excel</p></div><div class="lang"><button id="ua" class="active">UA</button><button id="en">EN</button></div></header><main class="body"><div class="grid">
+<div class="field"><label data-i="upload">1. Завантажте Excel з координатами</label><div class="drop"><input id="file" type="file" accept=".xlsx,.xls"><small data-i="columns">Правило: 1-ша колонка — назва точки, 2-га — Easting/X, 3-тя — Northing/Y. Назви колонок можуть бути будь-які.</small></div></div>
 <div class="field"><label data-i="zone">2. Система координат</label><select id="zone"><option value="36">WGS 1984 UTM Zone 36N</option><option value="37">WGS 1984 UTM Zone 37N</option></select></div>
 <div class="field"><label data-i="decl">3. Магнітне схилення</label><select id="decl"><option value="8">8°</option><option value="9">9°</option></select></div></div>
-<section id="ocrReview" hidden class="ocr-review"><h2 id="reviewTitle">Перевірка розпізнаних координат / Review recognized coordinates</h2><p id="reviewHelp">Перевірте кожен рядок. Виправте помилки OCR перед побудовою карти.</p><div class="review-actions"><button id="addOcrRow" class="mapbtn" type="button">+ Додати рядок / Add row</button><button id="applyOcr" class="primary" type="button">Підтвердити координати / Apply coordinates</button></div><div class="review-scroll"><table class="review-table"><thead><tr><th>Point</th><th>Easting / X</th><th>Northing / Y</th><th></th></tr></thead><tbody id="ocrRows"></tbody></table></div><details><summary>OCR text / Розпізнаний текст (можна редагувати)</summary><textarea id="ocrText" rows="8" style="width:100%"></textarea><button id="parseOcrText" class="mapbtn" type="button">Parse text / Розібрати текст</button></details></section><div id="status" class="status" data-i="waiting">Завантажте Excel-файл для початку.</div><div class="actions"><button id="generate" class="primary" disabled data-i="generate">Згенерувати Excel</button></div>
+<div id="status" class="status" data-i="waiting">Завантажте Excel-файл для початку.</div><div class="actions"><button id="generate" class="primary" disabled data-i="generate">Згенерувати Excel</button></div>
 <section id="preview" class="preview" hidden><h2 data-i="preview">Попередній перегляд</h2><div id="table"></div><div class="mapbox"><div class="maphead"><h2 data-i="mapTitle">Візуалізація на карті</h2><div class="mapcontrols"><label for="basemap" data-i="basemapLabel" style="font-size:13px;font-weight:700">Підкладка</label><select id="basemap" class="basemap-select" aria-label="Basemap"><option value="satellite">Satellite Imagery</option><option value="osm">OpenStreetMap</option></select><button id="zoomIn" class="mapbtn" title="Zoom in">+</button><button id="zoomOut" class="mapbtn" title="Zoom out">−</button><button id="fitMap" class="mapbtn" data-i="fitMap">Показати всі полігони</button></div></div><div id="map" class="mapframe"></div><div class="mapnote" data-i="mapNote">Контур ділянки: SP → TP1 → … → TPn → SP. LM/BM, якщо присутні, показуються окремо та не входять у площу.</div></div></section>
 <div class="foot" data-i="privacy">Розрахунок виконується у вашому браузері. Файл координат не завантажується на сервер.</div></main></div></div>
 <script>
@@ -110,118 +109,30 @@ async function writeXlsx(aoa,filename){
   const blob=await zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',compression:'DEFLATE'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
 }
-// Shared input pipeline: both Excel and OCR use the same validation, calculation and map rendering.
-function loadPointRecords(records){
+// Each SP starts a new polygon. Point names are scoped to that polygon.
+file.onchange=async e=>{try{
+ const f=e.target.files[0];if(!f)return;
+ const a=await readFirstSheet(await f.arrayBuffer());
  points=new Map();polygons=[];let current=null;
- for(const r of records){
+ for(const r of a.slice(1)){
   const name=norm(r[0]);if(!name)continue;
-  const x=Number(String(r[1]??'').replace(/\s/g,'').replace(',','.'));
-  const y=Number(String(r[2]??'').replace(/\s/g,'').replace(',','.'));
+  const x=Number(r[1]),y=Number(r[2]);
   if(r[1]===''||r[2]===''||!Number.isFinite(x)||!Number.isFinite(y))throw new Error(`${name}: invalid Easting/Northing`);
   const p={name,x,y};
-  if(name==='LM'||name==='BM'){if(points.has(name))throw new Error(`Duplicate shared point: ${name}`);points.set(name,p)}
-  else if(name==='SP'){current={id:polygons.length+1,points:new Map([['SP',p]])};polygons.push(current)}
-  else if(/^TP\d+$/.test(name)){if(!current)throw new Error(`${name}: SP must precede TP points`);if(current.points.has(name))throw new Error(`Polygon ${current.id}: duplicate ${name}`);current.points.set(name,p)}
- }
- validate();calculate();mapState={z:null,cx:null,cy:null,fit:true};generate.disabled=false;preview.hidden=false;setLoadedStatus();render();
-}
-function inputError(err){points=null;polygons=[];rows=null;generate.disabled=true;preview.hidden=true;setStatus(err?.message||I[lang].bad,'err')}
-file.onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const a=await readFirstSheet(await f.arrayBuffer());loadPointRecords(a.slice(1))}catch(err){inputError(err)}};
-// OCR supports multiple screenshot fragments and requires human verification before calculations.
-const excelTab=document.getElementById('excelTab'),imageTab=document.getElementById('imageTab');
-const excelInput=document.getElementById('excelInput'),imageInput=document.getElementById('imageInput');
-const imageFiles=document.getElementById('imageFiles'),recognize=document.getElementById('recognize');
-const ocrProgress=document.getElementById('ocrProgress'),ocrReview=document.getElementById('ocrReview');
-const ocrRows=document.getElementById('ocrRows'),ocrText=document.getElementById('ocrText');
-let ocrRecords=[];
-function selectSource(mode){const img=mode==='image';excelTab.classList.toggle('active',!img);imageTab.classList.toggle('active',img);excelInput.hidden=img;imageInput.hidden=!img;ocrReview.hidden=!img;points=null;polygons=[];rows=null;preview.hidden=true;generate.disabled=true;setStatus(I[lang].waiting,'');}
-excelTab.onclick=()=>selectSource('excel');imageTab.onclick=()=>selectSource('image');
-function parseCoordinateLines(text){
- // The original table has: FROM | TO | MAG | TRUE | DISTANCE | EASTING | NORTHING.
- // A point's coordinates belong to FROM, never TO. Reject incomplete/ambiguous rows.
- const out=[];
- const pointPattern=/(?:LM|BM|SP|[TТ][PР]\s*[0-9OОIl|]{1,3})/i;
- const normalizeToken=t=>String(t).replace(/[ОO]/g,'0').replace(/[Il|]/g,'1');
- const lines=text.split(/\r?\n/);
- for(const raw of lines){
-  const clean=raw.replace(/[│¦]/g,'|').replace(/[°º]/g,' ').replace(/\u00a0/g,' ').replace(/[–—]/g,'-').trim();
-  // OCR sometimes adds punctuation before a row or mixes Cyrillic/Latin TP.
-  const lead=clean.match(new RegExp('^\\s*[\\[({|:;.,-]*\\s*('+pointPattern.source+')(?=\\s|[|:;.,-])','i'));
-  if(!lead)continue;
-  const name=norm(normalizeToken(lead[1]));
-  if(!/^(LM|BM|SP|TP\d+)$/.test(name))continue;
-  const rest=clean.slice(lead[0].length);
-  // Remove optional TO point, then require two plausible UTM columns at the end.
-  const to=rest.match(new RegExp('^\\s*[|:;.,-]*\\s*('+pointPattern.source+')(?=\\s|[|:;.,-])','i'));
-  const tail=to?rest.slice(to[0].length):rest;
-  const numbers=[...tail.matchAll(/(?<![\d])\d[\d OОIl|]{3,12}\d(?![\d])/g)].map(m=>normalizeToken(m[0].replace(/\s/g,'')));
-  // Ignore bearings/distances; coordinates are typically 6 digits Easting and 7 digits Northing.
-  const pairs=[];
-  for(let i=0;i<numbers.length-1;i++){
-   const x=numbers[i],y=numbers[i+1];
-   if(/^\d{6}$/.test(x)&&/^\d{7}$/.test(y)&&+x>=100000&&+x<=900000&&+y>=0&&+y<=10000000)pairs.push([x,y]);
+  if(name==='LM'||name==='BM'){
+   if(points.has(name))throw new Error(`Duplicate shared point: ${name}`);
+   points.set(name,p);
+  }else if(name==='SP'){
+   current={id:polygons.length+1,points:new Map([['SP',p]])};polygons.push(current);
+  }else if(/^TP\d+$/.test(name)){
+   if(!current)throw new Error(`${name}: SP must precede TP points`);
+   if(current.points.has(name))throw new Error(`Polygon ${current.id}: duplicate ${name}`);
+   current.points.set(name,p);
   }
-  if(pairs.length===1)out.push([name,...pairs[0]]);
  }
- return out;
-}
-async function prepareOcrImage(file){
- const bitmap=await createImageBitmap(file);const scale=Math.max(1.5,Math.min(3,2200/bitmap.width));
- const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
- const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
- const data=ctx.getImageData(0,0,canvas.width,canvas.height);
- for(let i=0;i<data.data.length;i+=4){const g=Math.round(.299*data.data[i]+.587*data.data[i+1]+.114*data.data[i+2]);const v=g<175?0:255;data.data[i]=data.data[i+1]=data.data[i+2]=v;}
- ctx.putImageData(data,0,0);return canvas;
-}
-// v16: recognize three column strips separately, align their OCR words by vertical position.
-function cropStrip(canvas,left,right){const out=document.createElement('canvas');out.width=Math.max(1,Math.round(canvas.width*(right-left)));out.height=canvas.height;out.getContext('2d').drawImage(canvas,Math.round(canvas.width*left),0,out.width,canvas.height,0,0,out.width,out.height);return out}
-function wordsFromTsv(tsv){if(!tsv)return [];const lines=tsv.split(/\r?\n/),header=lines.shift().split('\t');const idx=k=>header.indexOf(k),out=[];for(const l of lines){const a=l.split('\t'),t=(a[idx('text')]||'').trim();if(!t)continue;const y=+a[idx('top')],h=+a[idx('height')],x=+a[idx('left')];if(Number.isFinite(y))out.push({t,y:y+h/2,x,conf:+a[idx('conf')]||0})}return out}
-function groupWords(words,tol=17){words.sort((a,b)=>a.y-b.y||a.x-b.x);const groups=[];for(const w of words){let g=groups.find(g=>Math.abs(g.y-w.y)<tol);if(!g){g={y:w.y,words:[]};groups.push(g)}g.words.push(w);g.y=g.words.reduce((a,b)=>a+b.y,0)/g.words.length}return groups.sort((a,b)=>a.y-b.y).map(g=>({y:g.y,text:g.words.sort((a,b)=>a.x-b.x).map(w=>w.t).join(' ')}))}
-function cleanPoint(t){const m=String(t).toUpperCase().replace(/[Т]/g,'T').replace(/[Р]/g,'P').replace(/[М]/g,'M').replace(/[В]/g,'B').replace(/[Ѕ]/g,'S').replace(/\s/g,'').match(/(?:LM|BM|SP|TP[0-9OОIl|]{1,3})/);return m?norm(m[0].replace(/[OО]/g,'0').replace(/[Il|]/g,'1')):null}
-function cleanCoord(t,digits){const tokens=String(t).replace(/[OО]/g,'0').replace(/[Il|]/g,'1').match(/\d+/g)||[];return tokens.find(x=>x.length===digits)||null}
-function joinByY(names,xs,ys){const out=[],usedX=new Set(),usedY=new Set();for(const n of names){const name=cleanPoint(n.text);if(!name)continue;function closest(rows,used){let best=-1,delta=Infinity;rows.forEach((r,i)=>{const d=Math.abs(r.y-n.y);if(!used.has(i)&&d<delta){delta=d;best=i}});return delta<27?best:-1}const xi=closest(xs,usedX),yi=closest(ys,usedY);if(xi<0||yi<0)continue;const x=cleanCoord(xs[xi].text,6),y=cleanCoord(ys[yi].text,7);if(x&&y){out.push([name,x,y]);usedX.add(xi);usedY.add(yi)}}return out}
-async function recognizeByColumns(worker,canvas){
- // Table screenshot columns: From, To, bearings, distance, Easting, Northing.
- // Detect a table's approximate left/right extent from dark vertical grid lines.
- const w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d'),data=ctx.getImageData(0,0,w,h).data;
- const hist=[];for(let x=0;x<w;x+=2){let count=0;for(let y=0;y<h;y+=5){const i=(y*w+x)*4;if(data[i]<110)count++}hist.push({x,count})}
- const candidates=hist.filter(a=>a.count>h/5/2.5).map(a=>a.x);
- const clusters=[];for(const x of candidates){const last=clusters.at(-1);if(last&&x-last.at(-1)<9)last.push(x);else clusters.push([x])}
- const verticals=clusters.map(a=>a[Math.floor(a.length/2)]).filter(x=>x>w*.01&&x<w*.99);
- let bounds;
- if(verticals.length>=7){const left=verticals[0],right=verticals.at(-1),step=(right-left)/7;bounds=[left,left+step,left+2*step,right-2*step,right-step,right]}else{bounds=[w*.02,w*.14,w*.25,w*.75,w*.86,w*.98]}
- // Default proportional strips are safer if irregular column widths.
- const strips=[[.02,.145],[.73,.865],[.865,.995]];
- const results=[];
- for(let i=0;i<3;i++){
-  const part=cropStrip(canvas,...strips[i]);
-  await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
-  const r=await worker.recognize(part,{}, {tsv:true,text:true});
-  const words=wordsFromTsv(r.data.tsv);const rows=groupWords(words,Math.max(12,Math.round(canvas.height/85)));
-  results.push({rows,text:r.data.text||''});
- }
- const aligned=joinByY(results[0].rows,results[1].rows,results[2].rows);
- return {records:aligned,debug:results.map((r,i)=>['FROM','EASTING','NORTHING'][i]+' COLUMN:\n'+r.text).join('\n\n')};
-}
-function addReviewRow(r=['','','']){const tr=document.createElement('tr');for(let i=0;i<3;i++){const td=document.createElement('td'),inp=document.createElement('input');inp.value=r[i]??'';inp.setAttribute('aria-label',['Point','Easting','Northing'][i]);td.appendChild(inp);tr.appendChild(td)}const td=document.createElement('td'),b=document.createElement('button');b.type='button';b.textContent='×';b.title='Remove row';b.onclick=()=>tr.remove();td.appendChild(b);tr.appendChild(td);ocrRows.appendChild(tr)}
-function showReview(data){ocrRows.replaceChildren();data.forEach(addReviewRow);ocrReview.hidden=false;ocrProgress.textContent=(lang==='uk'?`Знайдено рядків: ${data.length}. Обов’язково перевірте координати перед підтвердженням.`:`Rows found: ${data.length}. Check every coordinate and add missing points.`)}
-document.getElementById('addOcrRow').onclick=()=>addReviewRow();
-document.getElementById('parseOcrText').onclick=()=>showReview(parseCoordinateLines(ocrText.value));
-document.getElementById('applyOcr').onclick=()=>{try{const data=[...ocrRows.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('input')].map(x=>x.value.trim())).filter(r=>r.some(Boolean));if(!data.length)throw new Error('No coordinate rows.');loadPointRecords(data);ocrProgress.textContent=lang==='uk'?'✓ Координати підтверджено':'✓ Coordinates confirmed'}catch(e){inputError(e)}};
-async function loadTesseract(){if(window.Tesseract)return window.Tesseract;
- const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
- await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=()=>reject(new Error('OCR library could not load. Check network access.'));document.head.appendChild(script)});return window.Tesseract;
-}
-recognize.onclick=async()=>{const files=[...imageFiles.files];if(!files.length){ocrProgress.textContent=lang==='uk'?'Спочатку виберіть зображення.':'Select images first.';return}
- recognize.disabled=true;ocrReview.hidden=true;preview.hidden=true;generate.disabled=true;
- let worker=null;try{
-  const T=await loadTesseract();ocrProgress.textContent=lang==='uk'?'Завантаження OCR-моделі…':'Loading OCR model…';
-  worker=await T.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text')ocrProgress.textContent=`OCR: ${Math.round((m.progress||0)*100)}%`}});
-  const texts=[],records=[];for(let i=0;i<files.length;i++){ocrProgress.textContent=`OCR ${i+1}/${files.length}: ${files[i].name}`;const prepared=await prepareOcrImage(files[i]);const result=await recognizeByColumns(worker,prepared);texts.push(result.debug);records.push(...result.records)}
-  ocrText.value=texts.join('\n\n');showReview(records);if(records.length<3)ocrProgress.textContent=(lang==='uk'?'⚠ Розпізнано замало точок. Спробуйте окремі чіткі знімки кожної сторінки або виправте таблицю вручну.':'⚠ Too few points recognized. Try clear separate images for each page or edit rows manually.');
- }catch(e){ocrProgress.textContent=(lang==='uk'?'Помилка OCR: ':'OCR error: ')+e.message+'\n'+(lang==='uk'?'Можна вручну вставити текст у поле перевірки.':'You can paste text manually into the review area.');ocrReview.hidden=false}
- finally{if(worker)await worker.terminate().catch(()=>{});recognize.disabled=false}
-};
+ validate();calculate();mapState={z:null,cx:null,cy:null,fit:true};
+ generate.disabled=false;preview.hidden=false;setLoadedStatus();render();
+}catch(err){points=null;polygons=[];rows=null;generate.disabled=true;preview.hidden=true;setStatus(err?.message||I[lang].bad,'err')}};
 function getTPs(poly){return [...poly.points.keys()].filter(x=>/^TP\d+$/.test(x)).sort((a,b)=>+a.slice(2)-+b.slice(2))}
 function setLoadedStatus(){
  const count=polygons.reduce((n,p)=>n+p.points.size,points.size);
