@@ -212,6 +212,44 @@ function fitMapView(){
   for(;z>=3;z--){pix=geo.map(g=>({...g,...worldPx(g.lat,g.lon,z)}));const xs=pix.map(p=>p.x),ys=pix.map(p=>p.y);if(Math.max(...xs)-Math.min(...xs)<=W-pad*2&&Math.max(...ys)-Math.min(...ys)<=H-pad*2)break;}
   const xs=pix.map(p=>p.x),ys=pix.map(p=>p.y); mapState={z,cx:(Math.min(...xs)+Math.max(...xs))/2,cy:(Math.min(...ys)+Math.max(...ys))/2,fit:false};
 }
+function interiorLabelPoint(vertices){
+  // Area-weighted polygon centroid; if outside a concave polygon,
+  // find a point inside using horizontal scanline intersections.
+  let twiceArea=0,cx=0,cy=0;
+  for(let i=0;i<vertices.length;i++){
+    const a=vertices[i],b=vertices[(i+1)%vertices.length];
+    const cross=a.sx*b.sy-b.sx*a.sy;
+    twiceArea+=cross;cx+=(a.sx+b.sx)*cross;cy+=(a.sy+b.sy)*cross;
+  }
+  const inside=(x,y)=>{
+    let hit=false;
+    for(let i=0,j=vertices.length-1;i<vertices.length;j=i++){
+      const a=vertices[i],b=vertices[j];
+      if((a.sy>y)!==(b.sy>y) && x<(b.sx-a.sx)*(y-a.sy)/(b.sy-a.sy)+a.sx)hit=!hit;
+    }
+    return hit;
+  };
+  if(Math.abs(twiceArea)>1e-7){
+    cx/=3*twiceArea;cy/=3*twiceArea;
+    if(inside(cx,cy))return {x:cx,y:cy};
+  }
+  const ys=vertices.map(p=>p.sy),minY=Math.min(...ys),maxY=Math.max(...ys);
+  let best=null;
+  for(let k=1;k<=45;k++){
+    const y=minY+(maxY-minY)*k/46, intersections=[];
+    for(let i=0;i<vertices.length;i++){
+      const a=vertices[i],b=vertices[(i+1)%vertices.length];
+      if((a.sy<=y&&b.sy>y)||(b.sy<=y&&a.sy>y))
+        intersections.push(a.sx+(y-a.sy)*(b.sx-a.sx)/(b.sy-a.sy));
+    }
+    intersections.sort((a,b)=>a-b);
+    for(let j=0;j+1<intersections.length;j+=2){
+      const width=intersections[j+1]-intersections[j];
+      if(width>0&&(!best||width>best.width))best={x:(intersections[j]+intersections[j+1])/2,y,width};
+    }
+  }
+  return best||{x:vertices[0].sx,y:vertices[0].sy};
+}
 function renderMap(){
   if(!points||!mapEl)return; if(mapState.fit||mapState.z===null)fitMapView();
   const {zn,geo}=getMapGeo(), W=Math.max(mapEl.clientWidth||1000,320),H=460,z=mapState.z;
@@ -233,7 +271,11 @@ function renderMap(){
    const boundary=names.map(n=>{const p=pp[`${poly.id}:${n}`];return `${p.sx},${p.sy}`}).join(' ');
    svg+=`<polygon points="${boundary}" fill="${color}" fill-opacity="0.20" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>`;
    for(const n of ['SP',...tps]){const p=pp[`${poly.id}:${n}`];svg+=`<circle cx="${p.sx}" cy="${p.sy}" r="5" fill="#fff" stroke="${color}" stroke-width="3"><title>Polygon ${poly.id} · ${n}: Easting ${p.utm.x}, Northing ${p.utm.y}</title></circle><text x="${p.sx+8}" y="${p.sy-8}" font-size="13" font-weight="700" fill="${color}" paint-order="stroke" stroke="#fff" stroke-width="4">${n}</text>`;}
-   const center=pp[`${poly.id}:SP`];const siteLabel=siteName.value.trim();const polyLabel=siteLabel?(polygons.length>1?`${siteLabel} · ${lang==='uk'?'Полігон':'Polygon'} ${poly.id}`:siteLabel):`${lang==='uk'?'Полігон':'Polygon'} ${poly.id}`;svg+=`<text x="${center.sx+12}" y="${center.sy+25}" font-size="14" font-weight="700" fill="${color}" paint-order="stroke" stroke="#fff" stroke-width="4">${safeText(polyLabel)}</text>`;
+   const vertices=['SP',...tps].map(n=>pp[`${poly.id}:${n}`]);
+   const labelPoint=interiorLabelPoint(vertices);
+   const siteLabel=siteName.value.trim();
+   const polyLabel=siteLabel?(polygons.length>1?`${siteLabel} · ${lang==='uk'?'Полігон':'Polygon'} ${poly.id}`:siteLabel):`${lang==='uk'?'Полігон':'Polygon'} ${poly.id}`;
+   svg+=`<text x="${labelPoint.x}" y="${labelPoint.y}" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="700" fill="#fff" paint-order="stroke" stroke="#152a42" stroke-width="4" stroke-linejoin="round">${safeText(polyLabel)}</text>`;
   }
   for(const n of ['LM','BM'])if(pp[n]){const p=pp[n];svg+=`<circle cx="${p.sx}" cy="${p.sy}" r="7" fill="#f0a000" stroke="#fff" stroke-width="2"><title>${n}: Easting ${p.utm.x}, Northing ${p.utm.y}</title></circle><text x="${p.sx+10}" y="${p.sy-10}" font-size="15" font-weight="700" fill="#8a5700" paint-order="stroke" stroke="#fff" stroke-width="4">${n}</text>`;}
   const attribution=selectedBasemap==='satellite'?'Imagery: Esri, Maxar, Earthstar Geographics, and GIS User Community':'© OpenStreetMap contributors';
