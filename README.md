@@ -43,19 +43,6 @@ Shared LM→BM is calculated once (if both exist). For each polygon, BM→SP or 
 ### GitHub Pages
 Upload `index.html`, `README.md`, and `libs/jszip.min.js` to the repository root (with the JS file inside `libs/`). Enable Settings → Pages → Deploy from a branch → main → /(root).
 
-
-## v13 — Basemap switcher / Перемикач підкладки
-
-**English:** The interactive map defaults to **Satellite Imagery (Esri World Imagery)**. Use the **Basemap** dropdown above the map to switch to **OpenStreetMap** without changing the polygons, point labels, current zoom, or pan position. Satellite and OSM tiles require internet access to their respective providers. Attribution is shown on the map. Bearings, distances and Excel export are unaffected.
-
-**Українська:** За замовчуванням карта використовує **супутникові знімки Esri World Imagery**. У меню **Підкладка** над картою можна переключитися на **OpenStreetMap** без зміни полігонів, підписів, масштабу та положення карти. Для обох підкладок потрібен доступ до відповідних картографічних серверів. Атрибуція відображається на карті. Розрахунки та експорт Excel не змінюються.
-
-## v17 — Site name and map printing / Назва ділянки та друк карти
-
-**English:** Enter an optional site/polygon name beside the coordinate system and magnetic declination. It appears on the map; if several polygons are present, the name is combined with each polygon number. Use **Print map** to open the browser's print dialog and choose a printer or **Save as PDF**. Print in landscape and enable background graphics if the satellite basemap does not appear. The map needs to finish loading before printing. Map tile access depends on your network.
-
-**Українська:** Введіть необов'язкову назву ділянки поруч із системою координат і магнітним схиленням. Назва відображатиметься на карті; якщо полігонів кілька, до назви додається номер полігону. Натисніть **Друкувати карту**, щоб відкрити друк браузера, обрати принтер або **Зберегти як PDF**. Рекомендована альбомна орієнтація та ввімкнена опція друку фонової графіки. Перед друком дочекайтеся завантаження підкладки.
-\n## v18 / Назва всередині полігону\nSite labels are positioned inside each polygon (centroid with concave-polygon fallback). / Назви ділянок розташовуються всередині відповідних полігонів.\n
 ## v19 — Print layout / Макет друку
 The map print layout is optimized for one A4 landscape page at browser print scale 100%. The site cannot force browser printer settings, headers/footers, or printer color mode. If needed select A4, Landscape, disable headers/footers, and enable background graphics.
 
