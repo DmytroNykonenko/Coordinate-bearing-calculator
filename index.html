@@ -7,17 +7,18 @@
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#182230;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1050px;margin:36px auto;padding:0 20px}.card{background:#fff;border:1px solid #dde4ee;border-radius:18px;box-shadow:0 12px 35px rgba(31,45,61,.08);overflow:hidden}.head{padding:28px 32px;background:#17324d;color:#fff;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.head h1{margin:0 0 8px;font-size:28px}.head p{margin:0;color:#d9e5ef}.lang{display:flex;border:1px solid #6d8499;border-radius:10px;overflow:hidden;flex:none}.lang button{border:0;padding:9px 12px;background:transparent;color:#fff;cursor:pointer}.lang button.active{background:#fff;color:#17324d}.body{padding:30px 32px}.grid{display:grid;grid-template-columns:1.3fr .8fr .8fr .95fr;gap:18px}.field label{font-weight:700;display:block;margin-bottom:8px}.field small{display:block;color:#697586;margin-top:6px}.drop{border:2px dashed #b7c4d3;border-radius:12px;padding:20px;background:#f8fafc;min-height:92px}.drop input{width:100%}input[type="text"]{width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:0 10px;font-size:15px}select{width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:0 10px;background:#fff;font-size:15px}.status{margin-top:22px;border-radius:12px;padding:14px 16px;background:#f4f7fb;color:#4a5868;white-space:pre-line}.status.ok{background:#edf8f1;color:#17633a}.status.err{background:#fff0f0;color:#9f2626}.status.warn{background:#fff8e6;color:#805b00}.actions{display:flex;gap:12px;align-items:center;margin-top:22px}.primary{border:0;border-radius:10px;background:#17324d;color:white;font-weight:700;padding:13px 20px;cursor:pointer;font-size:15px}.primary:disabled{opacity:.45;cursor:not-allowed}.preview{margin-top:28px;overflow:auto}.preview h2{font-size:18px}.preview table{width:100%;border-collapse:collapse;min-width:820px}.preview th,.preview td{border:1px solid #d6dee8;padding:8px;text-align:center}.preview th{background:#e9eef5;font-size:13px}.preview .section-row td{background:#dfeaf5;text-align:left;font-weight:800;padding:10px 14px}.mapcontrols{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.basemap-select{width:auto;min-width:145px;height:36px;font-size:13px;border:1px solid #b9c5d1;border-radius:8px;background:#fff;padding:0 9px}.mapbtn{border:1px solid #b9c5d1;border-radius:8px;background:#fff;padding:8px 11px;cursor:pointer;font-weight:700}.mapbtn:hover{background:#f4f7fb}.mapframe{touch-action:none;cursor:grab}.mapframe.dragging{cursor:grabbing}.mapbox{margin-top:24px}.maphead{display:flex;justify-content:space-between;align-items:center;gap:12px}.mapframe{height:460px;border:1px solid #d6dee8;border-radius:12px;overflow:hidden;background:#eef2f5;position:relative}.mapframe svg{width:100%;height:100%;display:block}.mapnote{font-size:12px;color:#738092;margin-top:7px}.foot{font-size:12px;color:#738092;margin-top:20px}@media(max-width:780px){.grid{grid-template-columns:1fr}.head{flex-direction:column}.body,.head{padding:22px}}
 #printHeading{display:none}
-@media print{
- @page{size:A4 landscape;margin:12mm}
- body{background:#fff!important}
- .wrap,.card,.body{max-width:none;width:100%;margin:0;padding:0;border:0;box-shadow:none;overflow:visible}
- .head,.grid,.status,.actions,.preview>h2,#table,.maphead,.mapnote,.foot{display:none!important}
- .preview,.mapbox{display:block!important;margin:0!important;overflow:visible!important}
- #printHeading{display:block!important;margin:0 0 12px;color:#111}
- #printHeading h1{font-size:20px;margin:0 0 5px}
- #printHeading p{font-size:11px;margin:0 0 8px}
- .mapframe{height:175mm!important;width:100%!important;border:1px solid #bbb!important;break-inside:avoid}
- .mapframe svg{height:100%!important}
+@media print {
+ @page { size: A4 landscape; margin: 8mm; }
+ html,body { width:100%!important; height:auto!important; margin:0!important; padding:0!important; background:white!important; print-color-adjust:exact!important; -webkit-print-color-adjust:exact!important; }
+ body > .wrap { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; }
+ .card,.body { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; box-shadow:none!important; overflow:visible!important; }
+ .head,.grid,.status,.actions,.preview>h2,#table,.maphead,.mapnote,.foot { display:none!important; }
+ .preview,.mapbox { display:block!important; width:100%!important; max-width:none!important; margin:0!important; padding:0!important; overflow:visible!important; }
+ #printHeading { display:block!important; margin:0 0 3mm!important; padding:0!important; color:#111; break-after:avoid!important; }
+ #printHeading h1 { font-size:16pt!important; line-height:1.2!important; margin:0 0 1mm!important; }
+ #printHeading p { font-size:8pt!important; line-height:1.2!important; margin:0!important; }
+ .mapframe { display:block!important; width:100%!important; height:169mm!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; overflow:hidden!important; break-inside:avoid!important; page-break-inside:avoid!important; background:#fff!important; }
+ .mapframe svg { display:block!important; width:100%!important; height:100%!important; }
 }
 </style>
 </head><body><div class="wrap"><div class="card"><header class="head"><div><h1 data-i="title">Калькулятор координат та азимутів</h1><p data-i="subtitle">Excel → азимути, відстані, площа → готовий Excel</p></div><div class="lang"><button id="ua" class="active">UA</button><button id="en">EN</button></div></header><main class="body"><div class="grid">

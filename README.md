@@ -56,3 +56,7 @@ Upload `index.html`, `README.md`, and `libs/jszip.min.js` to the repository root
 
 **Українська:** Введіть необов'язкову назву ділянки поруч із системою координат і магнітним схиленням. Назва відображатиметься на карті; якщо полігонів кілька, до назви додається номер полігону. Натисніть **Друкувати карту**, щоб відкрити друк браузера, обрати принтер або **Зберегти як PDF**. Рекомендована альбомна орієнтація та ввімкнена опція друку фонової графіки. Перед друком дочекайтеся завантаження підкладки.
 \n## v18 / Назва всередині полігону\nSite labels are positioned inside each polygon (centroid with concave-polygon fallback). / Назви ділянок розташовуються всередині відповідних полігонів.\n
+## v19 — Print layout / Макет друку
+The map print layout is optimized for one A4 landscape page at browser print scale 100%. The site cannot force browser printer settings, headers/footers, or printer color mode. If needed select A4, Landscape, disable headers/footers, and enable background graphics.
+
+Макет друку оптимізовано для одного аркуша A4 в альбомній орієнтації при масштабі браузера 100%. Сайт не може примусово змінити налаштування принтера, колонтитули чи кольоровість. За потреби оберіть A4, Landscape, вимкніть колонтитули та увімкніть друк фонової графіки.
