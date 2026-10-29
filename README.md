@@ -49,3 +49,9 @@ Upload `index.html`, `README.md`, and `libs/jszip.min.js` to the repository root
 **English:** The interactive map defaults to **Satellite Imagery (Esri World Imagery)**. Use the **Basemap** dropdown above the map to switch to **OpenStreetMap** without changing the polygons, point labels, current zoom, or pan position. Satellite and OSM tiles require internet access to their respective providers. Attribution is shown on the map. Bearings, distances and Excel export are unaffected.
 
 **Українська:** За замовчуванням карта використовує **супутникові знімки Esri World Imagery**. У меню **Підкладка** над картою можна переключитися на **OpenStreetMap** без зміни полігонів, підписів, масштабу та положення карти. Для обох підкладок потрібен доступ до відповідних картографічних серверів. Атрибуція відображається на карті. Розрахунки та експорт Excel не змінюються.
+
+## v17 — Site name and map printing / Назва ділянки та друк карти
+
+**English:** Enter an optional site/polygon name beside the coordinate system and magnetic declination. It appears on the map; if several polygons are present, the name is combined with each polygon number. Use **Print map** to open the browser's print dialog and choose a printer or **Save as PDF**. Print in landscape and enable background graphics if the satellite basemap does not appear. The map needs to finish loading before printing. Map tile access depends on your network.
+
+**Українська:** Введіть необов'язкову назву ділянки поруч із системою координат і магнітним схиленням. Назва відображатиметься на карті; якщо полігонів кілька, до назви додається номер полігону. Натисніть **Друкувати карту**, щоб відкрити друк браузера, обрати принтер або **Зберегти як PDF**. Рекомендована альбомна орієнтація та ввімкнена опція друку фонової графіки. Перед друком дочекайтеся завантаження підкладки.
