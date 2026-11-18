@@ -30,8 +30,8 @@
 <div id="status" class="status" data-i="waiting">Завантажте Excel-файл для початку.</div><div class="actions"><button id="generate" class="primary" disabled data-i="generate">Згенерувати Excel</button></div>
 <section id="preview" class="preview" hidden><h2 data-i="preview">Попередній перегляд</h2><div id="table"></div><div class="mapbox"><div class="maphead"><h2 data-i="mapTitle">Візуалізація на карті</h2><div class="mapcontrols"><label for="basemap" data-i="basemapLabel" style="font-size:13px;font-weight:700">Підкладка</label><select id="basemap" class="basemap-select" aria-label="Basemap"><option value="satellite">Satellite Imagery</option><option value="osm">OpenStreetMap</option></select><button id="zoomIn" class="mapbtn" title="Zoom in">+</button><button id="zoomOut" class="mapbtn" title="Zoom out">−</button><button id="fitMap" class="mapbtn" data-i="fitMap">Показати всі полігони</button><button id="printMap" class="mapbtn" data-i="printMap">Друкувати карту</button></div></div><div id="printHeading"><h1 id="printTitle"></h1><p id="printSubtitle"></p></div><div id="map" class="mapframe"></div><div class="mapnote" data-i="mapNote">Контур ділянки: SP → TP1 → … → TPn → SP. LM/BM, якщо присутні, показуються окремо та не входять у площу.</div></div></section>
 </div><section id="turningPanel" hidden>
-<h2>Turning Points Generator</h2><p class="tp-note" id="tpIntro">Завантажте полігони KML, KMZ або GeoJSON. Перша вершина кожного полігона зберігається як SP; інші впорядковуються за годинниковою стрілкою.</p>
-<div class="tp-grid"><div class="field"><label id="tpFileLabel">1. Файл полігонів</label><div class="drop"><input type="file" id="tpFile" accept=".kml,.kmz,.geojson,.json"></div></div><div class="field"><label id="tpZoneLabel">2. UTM Zone</label><select id="tpZone"><option value="auto">Auto (per polygon)</option><option value="36">WGS 1984 UTM Zone 36N</option><option value="37">WGS 1984 UTM Zone 37N</option></select></div><div class="field"><label id="tpDeclLabel">3. Магнітне схилення</label><input id="tpDecl" type="number" step="0.1" value="8" style="width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:8px"></div></div>
+<h2>Turning Points Generator</h2><p class="tp-note" id="tpIntro">Завантажте полігони KML, KMZ, GeoJSON, JSON або ZIP Shapefile. Перша вершина кожного полігона зберігається як SP; інші впорядковуються за годинниковою стрілкою.</p>
+<div class="tp-grid"><div class="field"><label id="tpFileLabel">1. Файл полігонів</label><div class="drop"><input type="file" id="tpFile" accept=".kml,.kmz,.geojson,.json,.zip"></div></div><div class="field"><label id="tpZoneLabel">2. UTM Zone</label><select id="tpZone"><option value="auto">Auto (per polygon)</option><option value="36">WGS 1984 UTM Zone 36N</option><option value="37">WGS 1984 UTM Zone 37N</option></select></div><div class="field"><label id="tpDeclLabel">3. Магнітне схилення</label><input id="tpDecl" type="number" step="0.1" value="8" style="width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:8px"></div></div>
 <div id="tpStatus" class="status">Очікування файлу.</div><div class="tp-actions"><button id="tpExport" class="primary" disabled>Export Excel</button><button id="tpKml" class="mapbtn" disabled>Export KML</button><button id="tpSend" class="mapbtn" disabled>Send to Coordinate Calculator</button><button id="tpPrint" class="mapbtn" disabled>Print Map</button></div>
 <div id="tpResults" hidden><div class="tp-mapbox"><div class="maphead tp-maphead"><h2 id="tpMapHeading">Попередній перегляд полігона та поворотних точок</h2><div class="mapcontrols"><select id="tpBasemap" class="basemap-select"><option value="satellite">Satellite Imagery</option><option value="osm">OpenStreetMap</option></select><button id="tpZoomIn" class="mapbtn">+</button><button id="tpZoomOut" class="mapbtn">−</button><button id="tpFit" class="mapbtn">Показати всі полігони</button></div></div><div id="tpMap" class="tp-map mapframe"></div><p class="tp-note" id="tpMapNote">Контур полігона, SP і TP1–TPn на супутниковій карті. Можна масштабувати та переміщувати карту.</p></div><h2 id="tpTableHeading" class="tp-table-heading">Таблиця координат та азимутів</h2><div class="tp-table" id="tpTable"></div></div></section>
 <div class="foot" data-i="privacy">Розрахунок виконується у вашому браузері. Файл координат не завантажується на сервер.</div></main></div></div>
@@ -347,7 +347,108 @@ function tpClean(r){let pts=r.map(p=>[Number(p[0]),Number(p[1])]);if(pts.length>
 function tpGeojson(obj){let result=[];function geom(g,name){if(!g)return;if(g.type==='Polygon')result.push({name,ring:tpClean(g.coordinates[0])});else if(g.type==='MultiPolygon')g.coordinates.forEach((p,i)=>result.push({name:name+' '+(i+1),ring:tpClean(p[0])}));else if(g.type==='GeometryCollection')g.geometries.forEach((x,i)=>geom(x,name+' '+(i+1)));}
  if(obj.type==='FeatureCollection')obj.features.forEach((f,i)=>geom(f.geometry,String(f.properties?.name||f.properties?.Name||'Polygon '+(i+1))));else if(obj.type==='Feature')geom(obj.geometry,String(obj.properties?.name||'Polygon 1'));else geom(obj,'Polygon 1');return result;}
 function tpKmlParse(xml){const doc=new DOMParser().parseFromString(xml,'application/xml');if(doc.querySelector('parsererror'))throw Error('Invalid KML XML');const res=[];const placemarks=[...doc.getElementsByTagName('*')].filter(e=>e.localName==='Placemark');for(const [i,pm] of placemarks.entries()){const name=[...pm.children].find(e=>e.localName==='name')?.textContent?.trim()||'Polygon '+(i+1);const polygons=[...pm.getElementsByTagName('*')].filter(e=>e.localName==='Polygon');for(const [j,poly] of polygons.entries()){const outer=[...poly.getElementsByTagName('*')].find(e=>e.localName==='outerBoundaryIs');const coord=outer&&[...outer.getElementsByTagName('*')].find(e=>e.localName==='coordinates');if(!coord)continue;const ring=coord.textContent.trim().split(/\s+/).map(x=>x.split(',').slice(0,2).map(Number));res.push({name:polygons.length>1?name+' '+(j+1):name,ring:tpClean(ring)});}}return res;}
-async function tpReadFile(f){const ext=f.name.toLowerCase().split('.').pop();if(ext==='geojson'||ext==='json')return tpGeojson(JSON.parse(await f.text()));if(ext==='kml')return tpKmlParse(await f.text());if(ext==='kmz'){if(typeof JSZip==='undefined')throw Error('JSZip module not loaded');const z=await JSZip.loadAsync(await f.arrayBuffer());const k=Object.keys(z.files).find(x=>x.toLowerCase().endsWith('.kml'));if(!k)throw Error('KMZ contains no KML');return tpKmlParse(await z.file(k).async('string'));}throw Error('Unsupported format');}
+// Local Shapefile reader: polygon SHP (types 5/15/25), optional DBF names, PRJ required.
+function tpShpCrs(prj){
+ const t=prj.toUpperCase();
+ if(/3857|900913|PSEUDO[_ ]?MERCATOR|WEB[_ ]?MERCATOR|MERCATOR_AUXILIARY_SPHERE/.test(t))return 3857;
+ if(/32636|UTM[_ ]ZONE[_ ]36N|UTM ZONE 36N/.test(t))return 32636;
+ if(/32637|UTM[_ ]ZONE[_ ]37N|UTM ZONE 37N/.test(t))return 32637;
+ if(/4326|GCS_WGS_1984|WGS[_ ]?84|WGS 1984/.test(t)&&!/PROJCS|PROJCRS|PROJECTEDCRS/.test(t))return 4326;
+ throw Error('Unsupported shapefile CRS. Export to WGS 1984 (EPSG:4326) or WGS 1984 UTM 36N/37N.');
+}
+function tpToLonLat(x,y,wkid){
+ if(wkid===4326)return [x,y];
+ if(wkid===32636||wkid===32637){const p=utmToLatLon(x,y,wkid-32600);return [p.lon,p.lat];}
+ if(wkid===3857)return [x*180/(Math.PI*6378137),(2*Math.atan(Math.exp(y/6378137))-Math.PI/2)*180/Math.PI];
+ throw Error('Unsupported coordinate reference system: '+wkid);
+}
+function tpDbfNames(buffer){
+ if(!buffer)return [];
+ const v=new DataView(buffer),count=v.getUint32(4,true),head=v.getUint16(8,true),size=v.getUint16(10,true),fields=[];
+ if(head>buffer.byteLength||size<1)throw Error('Invalid DBF');
+ for(let off=32,position=1;off+32<=head&&v.getUint8(off)!==13;off+=32){
+  const bytes=new Uint8Array(buffer,off,11),name=new TextDecoder('ascii').decode(bytes).replace(/\0.*$/,'').trim();
+  fields.push({name,offset:position,length:v.getUint8(off+16)});position+=v.getUint8(off+16);
+ }
+ const nameField=fields.find(f=>/^(name|polygon_name|site_name|title|назва)$/i.test(f.name));
+ const names=[];if(!nameField)return names;
+ const dec=new TextDecoder('utf-8',{fatal:false});
+ for(let i=0;i<count&&head+(i+1)*size<=buffer.byteLength;i++){
+  const off=head+i*size;if(v.getUint8(off)===42){names.push('');continue;}
+  names.push(dec.decode(new Uint8Array(buffer,off+nameField.offset,nameField.length)).replace(/\0/g,'').trim());
+ }
+ return names;
+}
+function tpParseShp(buffer,wkid,names,prefix){
+ const v=new DataView(buffer),out=[];
+ if(v.byteLength<100||v.getInt32(0,false)!==9994)throw Error('Invalid .shp file');
+ const shape=v.getInt32(32,true);
+ if(![5,15,25].includes(shape))throw Error('Shapefile must contain polygons (Polygon / PolygonZ / PolygonM).');
+ let off=100,record=0;
+ while(off+8<=v.byteLength){
+  const bytes=v.getInt32(off+4,false)*2,begin=off+8,stop=begin+bytes;off=stop;
+  if(bytes<4||stop>v.byteLength)throw Error('Damaged SHP record');
+  const type=v.getInt32(begin,true);if(type===0){record++;continue;}
+  if(![5,15,25].includes(type)||bytes<44)throw Error('Unsupported SHP geometry');
+  const parts=v.getInt32(begin+36,true),n=v.getInt32(begin+40,true),partStart=begin+44,pointStart=partStart+4*parts;
+  if(parts<1||n<3||pointStart+16*n>stop)throw Error('Invalid polygon parts in SHP');
+  const starts=[];for(let i=0;i<parts;i++)starts.push(v.getInt32(partStart+4*i,true));starts.push(n);
+  const rings=[];
+  for(let i=0;i<parts;i++){
+   const ring=[];for(let j=starts[i];j<starts[i+1];j++)ring.push(tpToLonLat(v.getFloat64(pointStart+j*16,true),v.getFloat64(pointStart+j*16+8,true),wkid));
+   if(ring.length>=4)rings.push(ring);
+  }
+  // Shapefile exterior rings are clockwise in their native planar coordinates.
+  // For multipart polygons, positive signed area after conversion indicates a hole.
+  const outer=rings.filter(r=>tpSigned(r)<0);
+  const selected=outer.length?outer:rings.slice(0,1);
+  selected.forEach((ring,i)=>out.push({name:(names[record]||prefix+' '+(record+1))+(selected.length>1?' '+(i+1):''),ring:tpClean(ring)}));
+  record++;
+ }
+ return out;
+}
+async function tpReadShpZip(file){
+ if(typeof JSZip==='undefined')throw Error('JSZip module not loaded');
+ const zip=await JSZip.loadAsync(await file.arrayBuffer());
+ const entries=Object.values(zip.files).filter(x=>!x.dir&&!x.name.startsWith('__MACOSX/'));
+ const shps=entries.filter(x=>/\.shp$/i.test(x.name));
+ if(!shps.length)throw Error('ZIP does not contain a .shp file');
+ let result=[];
+ for(const shp of shps){
+  const stem=shp.name.replace(/\.shp$/i,'');
+  const find=ext=>entries.find(x=>x.name.toLowerCase()===(stem+'.'+ext).toLowerCase());
+  const prj=find('prj');if(!prj)throw Error('Missing .prj for '+shp.name+'. Export with a defined coordinate system.');
+  const wkid=tpShpCrs(await prj.async('string'));
+  const dbf=find('dbf');const names=dbf?tpDbfNames(await dbf.async('arraybuffer')):[];
+  result.push(...tpParseShp(await shp.async('arraybuffer'),wkid,names,stem.split('/').pop()));
+ }
+ return result;
+}
+function tpArcgisJson(obj){
+ const out=[];
+ function add(g,name,crs){
+  if(!g)return;
+  const wkid=Number(g.spatialReference?.latestWkid||g.spatialReference?.wkid||crs||4326);
+  if(![4326,32636,32637,3857,102100].includes(wkid))throw Error('Unsupported ArcGIS JSON WKID: '+wkid);
+  const rings=g.rings||[];const converted=rings.map(r=>r.map(p=>tpToLonLat(Number(p[0]),Number(p[1]),wkid===102100?3857:wkid)));
+  const outer=converted.filter(r=>tpSigned(r)<0),selected=outer.length?outer:converted.slice(0,1);
+  selected.forEach((r,i)=>out.push({name:name+(selected.length>1?' '+(i+1):''),ring:tpClean(r)}));
+ }
+ if(Array.isArray(obj.features)&&obj.features.some(f=>f.geometry?.rings))obj.features.forEach((f,i)=>add(f.geometry,String(f.attributes?.name||f.attributes?.Name||'Polygon '+(i+1)),obj.spatialReference?.latestWkid||obj.spatialReference?.wkid));
+ else if(obj.rings)add(obj,'Polygon 1');
+ return out;
+}
+async function tpReadFile(f){
+ const ext=f.name.toLowerCase().split('.').pop();
+ if(ext==='geojson'||ext==='json'){
+  const obj=JSON.parse((await f.text()).replace(/^\uFEFF/,''));
+  const arc=tpArcgisJson(obj);return arc.length?arc:tpGeojson(obj);
+ }
+ if(ext==='zip')return tpReadShpZip(f);
+ if(ext==='kml')return tpKmlParse(await f.text());
+ if(ext==='kmz'){if(typeof JSZip==='undefined')throw Error('JSZip module not loaded');const z=await JSZip.loadAsync(await f.arrayBuffer());const k=Object.keys(z.files).find(x=>x.toLowerCase().endsWith('.kml'));if(!k)throw Error('KMZ contains no KML');return tpKmlParse(await z.file(k).async('string'));}
+ throw Error('Unsupported format');
+}
 function tpCalculate(){const d=Number(tp('tpDecl').value);if(!Number.isFinite(d))throw Error('Invalid declination');tpRows=[];for(let i=0;i<tpPolys.length;i++){const poly=tpPolys[i],ring=poly.ring;poly.zone=tp('tpZone').value==='auto'?Math.min(60,Math.max(1,Math.floor((ring[0][0]+180)/6)+1)):Number(tp('tpZone').value);tpRows.push({section:i+1,name:poly.name});for(let j=0;j<ring.length;j++){const from=j?'TP'+j:'SP',to=j===ring.length-1?'SP':'TP'+(j+1),geo=tpInverse(ring[j],ring[(j+1)%ring.length]),utm=tpUtm(...ring[j],poly.zone);tpRows.push({poly:i+1,from,to,mag:tpRound((geo.bearing-d+3600)%360),trueb:tpRound(geo.bearing)%360,distance:tpRound(geo.distance),x:tpRound(utm.x),y:tpRound(utm.y),zone:poly.zone,lon:ring[j][0],lat:ring[j][1]});}}}
 function tpAoa(){return [['Від\nFrom','До\nTo','Азимут (Магнітний)\nMagnetic bearing','Азимут (Істинний)\nTrue bearing','Відстань(м)\nDistance','Long/UTMX','Lat/UTMY','UTM Zone'],...tpRows.map(r=>r.section?[`${r.name} (Polygon ${r.section})`]:[r.from,r.to,r.mag,r.trueb,r.distance,String(r.x).padStart(7,'0'),r.y,r.zone+'N'])]}
 function tpRenderTable(){let html='<table><thead><tr>'+tpAoa()[0].map(v=>'<th>'+safeText(v).replace(/\n/g,'<br>')+'</th>').join('')+'</tr></thead><tbody>';for(const r of tpRows){if(r.section){html+='<tr class="section-row"><td colspan="8">'+safeText(r.name)+' · Polygon '+r.section+'</td></tr>';}else html+='<tr>'+[r.from,r.to,r.mag,r.trueb,r.distance,String(r.x).padStart(7,'0'),r.y,r.zone+'N'].map(v=>'<td>'+safeText(v)+'</td>').join('')+'</tr>';}tp('tpTable').innerHTML=html+'</tbody></table>';}
