@@ -22,6 +22,7 @@
 }
 
 [hidden]{display:none!important}.tp-mapbox{margin-top:24px}.tp-maphead{margin-bottom:10px}.tp-table-heading{margin-top:25px}.tabs{display:flex;gap:8px;padding:14px 32px 0;background:#fff;border-bottom:1px solid #dde4ee}.tab{border:0;background:transparent;padding:12px 18px;cursor:pointer;font-weight:700;color:#607387;border-bottom:3px solid transparent}.tab.active{color:#17324d;border-bottom-color:#17324d}.tp-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:18px}.tp-actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.tp-map{height:460px;border:1px solid #d6dee8;border-radius:12px;overflow:hidden}.tp-map svg{width:100%;height:100%}.tp-note{color:#64748b;font-size:13px}.tp-table{overflow:auto}.tp-table table{width:100%;border-collapse:collapse;min-width:850px}.tp-table td,.tp-table th{padding:8px;border:1px solid #d6dee8;text-align:center}.tp-table th{background:#e9eef5}.tp-table .section-row td{text-align:left;background:#dfeaf5;font-weight:700}@media(max-width:780px){.tp-grid{grid-template-columns:1fr}.tabs{padding-left:15px}}@media print{.tabs,#turningPanel{display:none!important}}
+.area-total-row td{background:#c9e3d5!important;color:#17472d;font-weight:800!important}
 </style>
 </head><body><div class="wrap"><div class="card"><header class="head"><div><h1 data-i="title">Калькулятор координат та азимутів</h1><p data-i="subtitle">Excel → азимути, відстані, площа → готовий Excel</p></div><div class="lang"><button id="ua" class="active">UA</button><button id="en">EN</button></div></header><nav class="tabs"><button class="tab active" id="tabCalc">Coordinate Calculator</button><button class="tab" id="tabTP">Turning Points Generator</button></nav><main class="body"><div id="calculatorPanel"><div class="grid">
 <div class="field"><label data-i="upload">1. Завантажте Excel з координатами</label><div class="drop"><input id="file" type="file" accept=".xlsx,.xls"><small data-i="columns">Правило: 1-ша колонка — назва точки, 2-га — Easting/X, 3-тя — Northing/Y. Назви колонок можуть бути будь-які.</small></div></div>
@@ -190,10 +191,29 @@ function calculate(){
  });
 }
 decl.onchange=()=>{if(points){calculate();render()}};zone.onchange=()=>{if(points){mapState.fit=true;render()}};
+// Planar area in square metres, calculated from UTM coordinates (shoelace formula).
+// LM/BM are deliberately excluded; only SP and TP vertices define the boundary.
+function calculatorPolygonArea(poly){
+ const vertices=['SP',...getTPs(poly)].map(name=>poly.points.get(name));
+ if(vertices.length<3)return 0;
+ // Translate origin to the first vertex to reduce floating-point cancellation.
+ const ox=vertices[0].x,oy=vertices[0].y;
+ let twiceArea=0;
+ for(let i=0;i<vertices.length;i++){
+  const a=vertices[i],b=vertices[(i+1)%vertices.length];
+  twiceArea+=(a.x-ox)*(b.y-oy)-(b.x-ox)*(a.y-oy);
+ }
+ return Math.abs(twiceArea)/2;
+}
+function formatAreaValue(value){
+ return new Intl.NumberFormat(lang==='uk'?'uk-UA':'en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value);
+}
 function render(){if(!rows||preview.hidden)return;
  let h='<table><thead><tr><th>Від<br>From</th><th>До<br>To</th><th>Азимут (Магнітний)<br>Magnetic bearing</th><th>Азимут (Істинний)<br>True bearing</th><th>Відстань (м)<br>Distance</th><th>Long/UTMX</th><th>Lat/UTMY</th></tr></thead><tbody>';
- for(const r of rows){if(r.section){h+=`<tr class="section-row"><td colspan="7">${lang==='uk'?'Полігон':'Polygon'} ${r.section}</td></tr>`;continue}
+ for(const r of rows){if(r.section){const poly=polygons.find(p=>p.id===r.section);const area=calculatorPolygonArea(poly);h+=`<tr class="section-row"><td colspan="7">${lang==='uk'?'Полігон':'Polygon'} ${r.section} — ${lang==='uk'?'Площа':'Area'}: ${formatAreaValue(area)} ${lang==='uk'?'м²':'m²'} (${formatAreaValue(area/10000)} ${lang==='uk'?'га':'ha'})</td></tr>`;continue}
  h+=`<tr><td>${r.from}</td><td>${r.to}</td><td>${r.mag}</td><td>${r.trueb}</td><td>${r.distance}</td><td>${String(r.x).padStart(7,'0')}</td><td>${r.y}</td></tr>`}
+ const totalArea=polygons.reduce((sum,poly)=>sum+calculatorPolygonArea(poly),0);
+ h+=`<tr class="section-row area-total-row"><td colspan="7">${lang==='uk'?'ЗАГАЛЬНА ПЛОЩА ВСІХ ПОЛІГОНІВ':'TOTAL AREA OF ALL POLYGONS'}: ${formatAreaValue(totalArea)} ${lang==='uk'?'м²':'m²'} (${formatAreaValue(totalArea/10000)} ${lang==='uk'?'га':'ha'})</td></tr>`;
  table.innerHTML=h+'</tbody></table>';renderMap();}
 function utmToLatLon(E,N,zoneNum){
   const a=6378137.0, eccSquared=0.00669438, k0=0.9996;
@@ -344,53 +364,8 @@ function tpInverse(a,b){ // Vincenty inverse WGS84, spherical fallback
 }
 function tpSigned(r){let a=0;for(let i=0;i<r.length;i++){const p=r[i],q=r[(i+1)%r.length];a+=p[0]*q[1]-q[0]*p[1]}return a/2}
 function tpClean(r){let pts=r.map(p=>[Number(p[0]),Number(p[1])]);if(pts.length>1&&pts[0][0]===pts.at(-1)[0]&&pts[0][1]===pts.at(-1)[1])pts.pop();if(pts.length<3||pts.some(p=>!p.every(Number.isFinite)||Math.abs(p[0])>180||Math.abs(p[1])>90))throw Error('Invalid polygon coordinates (expected WGS84 longitude, latitude).');if(tpSigned(pts)>0)pts=[pts[0],...pts.slice(1).reverse()];return pts}
-// GeoJSON importer: respect declared CRS; detect Web Mercator only when unambiguous.
-function tpGeojsonCrs(obj){
- const crs=obj.crs;
- if(crs){
-  const raw=String(crs.properties?.name||crs.properties?.code||'').toUpperCase();
-  const m=raw.match(/(?:EPSG[:/]|::|WKID[:=]?)(\d{4,6})\b/) || raw.match(/^(\d{4,6})$/);
-  const code=m?Number(m[1]):null;
-  if([3857,102100,102113,900913].includes(code))return 3857;
-  if([4326,32636,32637].includes(code))return code;
-  throw Error('Unsupported GeoJSON CRS: '+(raw||JSON.stringify(crs)));
- }
- // GeoJSON without a CRS declaration is normally WGS84. Only auto-detect
- // Web Mercator when coordinates clearly cannot be longitude/latitude.
- let sample=null;
- function scan(g){if(!g||sample)return; if(g.type==='GeometryCollection'){(g.geometries||[]).forEach(scan);return;}
-  if(!['Polygon','MultiPolygon'].includes(g.type))return;
-  let c=g.coordinates;while(Array.isArray(c)&&Array.isArray(c[0]))c=c[0];
-  if(Array.isArray(c)&&Number.isFinite(Number(c[0]))&&Number.isFinite(Number(c[1])))sample=c;
- }
- if(obj.type==='FeatureCollection')(obj.features||[]).forEach(f=>scan(f.geometry));
- else if(obj.type==='Feature')scan(obj.geometry);else scan(obj);
- if(sample&&(Math.abs(Number(sample[0]))>180||Math.abs(Number(sample[1]))>90)){
-  if(Math.abs(Number(sample[0]))<=20037508.35&&Math.abs(Number(sample[1]))<=20037508.35)return 3857;
-  throw Error('Projected coordinates detected, but GeoJSON CRS is missing or unsupported.');
- }
- return 4326;
-}
-function tpGeojson(obj){
- const wkid=tpGeojsonCrs(obj),result=[];
- function addRing(r,name){
-  if(!Array.isArray(r))throw Error('Invalid GeoJSON polygon ring');
-  result.push({name,ring:tpClean(r.map(p=>{
-   if(!Array.isArray(p)||p.length<2||!Number.isFinite(Number(p[0]))||!Number.isFinite(Number(p[1])))throw Error('Invalid GeoJSON coordinate');
-   return tpToLonLat(Number(p[0]),Number(p[1]),wkid);
-  }))});
- }
- function geom(g,name){if(!g)return;
-  if(g.type==='Polygon')addRing(g.coordinates?.[0],name);
-  else if(g.type==='MultiPolygon')g.coordinates.forEach((p,i)=>addRing(p[0],name+' '+(i+1)));
-  else if(g.type==='GeometryCollection')(g.geometries||[]).forEach((x,i)=>geom(x,name+' '+(i+1)));
- }
- function nameOf(p,i){return String(p?.name||p?.Name||p?.polygon_name||p?.site_name||p?.external_reference_id||p?.internal_reference_id||'Polygon '+(i+1));}
- if(obj.type==='FeatureCollection')(obj.features||[]).forEach((f,i)=>geom(f.geometry,nameOf(f.properties,i)));
- else if(obj.type==='Feature')geom(obj.geometry,nameOf(obj.properties,0));
- else geom(obj,'Polygon 1');
- return result;
-}
+function tpGeojson(obj){let result=[];function geom(g,name){if(!g)return;if(g.type==='Polygon')result.push({name,ring:tpClean(g.coordinates[0])});else if(g.type==='MultiPolygon')g.coordinates.forEach((p,i)=>result.push({name:name+' '+(i+1),ring:tpClean(p[0])}));else if(g.type==='GeometryCollection')g.geometries.forEach((x,i)=>geom(x,name+' '+(i+1)));}
+ if(obj.type==='FeatureCollection')obj.features.forEach((f,i)=>geom(f.geometry,String(f.properties?.name||f.properties?.Name||'Polygon '+(i+1))));else if(obj.type==='Feature')geom(obj.geometry,String(obj.properties?.name||'Polygon 1'));else geom(obj,'Polygon 1');return result;}
 function tpKmlParse(xml){const doc=new DOMParser().parseFromString(xml,'application/xml');if(doc.querySelector('parsererror'))throw Error('Invalid KML XML');const res=[];const placemarks=[...doc.getElementsByTagName('*')].filter(e=>e.localName==='Placemark');for(const [i,pm] of placemarks.entries()){const name=[...pm.children].find(e=>e.localName==='name')?.textContent?.trim()||'Polygon '+(i+1);const polygons=[...pm.getElementsByTagName('*')].filter(e=>e.localName==='Polygon');for(const [j,poly] of polygons.entries()){const outer=[...poly.getElementsByTagName('*')].find(e=>e.localName==='outerBoundaryIs');const coord=outer&&[...outer.getElementsByTagName('*')].find(e=>e.localName==='coordinates');if(!coord)continue;const ring=coord.textContent.trim().split(/\s+/).map(x=>x.split(',').slice(0,2).map(Number));res.push({name:polygons.length>1?name+' '+(j+1):name,ring:tpClean(ring)});}}return res;}
 // Local Shapefile reader: polygon SHP (types 5/15/25), optional DBF names, PRJ required.
 function tpShpCrs(prj){
