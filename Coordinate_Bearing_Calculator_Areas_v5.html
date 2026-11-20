@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coordinate & Bearing Calculator</title>
+<script src="./libs/jszip.min.js"></script>
+<style>
+:root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#182230;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1050px;margin:36px auto;padding:0 20px}.card{background:#fff;border:1px solid #dde4ee;border-radius:18px;box-shadow:0 12px 35px rgba(31,45,61,.08);overflow:hidden}.head{padding:28px 32px;background:#17324d;color:#fff;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.head h1{margin:0 0 8px;font-size:28px}.head p{margin:0;color:#d9e5ef}.lang{display:flex;border:1px solid #6d8499;border-radius:10px;overflow:hidden;flex:none}.lang button{border:0;padding:9px 12px;background:transparent;color:#fff;cursor:pointer}.lang button.active{background:#fff;color:#17324d}.body{padding:30px 32px}.grid{display:grid;grid-template-columns:1.3fr .8fr .8fr .95fr;gap:18px}.field label{font-weight:700;display:block;margin-bottom:8px}.field small{display:block;color:#697586;margin-top:6px}.drop{border:2px dashed #b7c4d3;border-radius:12px;padding:20px;background:#f8fafc;min-height:92px}.drop input{width:100%}input[type="text"]{width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:0 10px;font-size:15px}select{width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:0 10px;background:#fff;font-size:15px}.status{margin-top:22px;border-radius:12px;padding:14px 16px;background:#f4f7fb;color:#4a5868;white-space:pre-line}.status.ok{background:#edf8f1;color:#17633a}.status.err{background:#fff0f0;color:#9f2626}.status.warn{background:#fff8e6;color:#805b00}.actions{display:flex;gap:12px;align-items:center;margin-top:22px}.primary{border:0;border-radius:10px;background:#17324d;color:white;font-weight:700;padding:13px 20px;cursor:pointer;font-size:15px}.primary:disabled{opacity:.45;cursor:not-allowed}.preview{margin-top:28px;overflow:auto}.preview h2{font-size:18px}.preview table{width:100%;border-collapse:collapse;min-width:820px}.preview th,.preview td{border:1px solid #d6dee8;padding:8px;text-align:center}.preview th{background:#e9eef5;font-size:13px}.preview .section-row td{background:#dfeaf5;text-align:left;font-weight:800;padding:10px 14px}.mapcontrols{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.basemap-select{width:auto;min-width:145px;height:36px;font-size:13px;border:1px solid #b9c5d1;border-radius:8px;background:#fff;padding:0 9px}.mapbtn{border:1px solid #b9c5d1;border-radius:8px;background:#fff;padding:8px 11px;cursor:pointer;font-weight:700}.mapbtn:hover{background:#f4f7fb}.mapframe{touch-action:none;cursor:grab}.mapframe.dragging{cursor:grabbing}.mapbox{margin-top:24px}.maphead{display:flex;justify-content:space-between;align-items:center;gap:12px}.mapframe{height:460px;border:1px solid #d6dee8;border-radius:12px;overflow:hidden;background:#eef2f5;position:relative}.mapframe svg{width:100%;height:100%;display:block}.mapnote{font-size:12px;color:#738092;margin-top:7px}.foot{font-size:12px;color:#738092;margin-top:20px}@media(max-width:780px){.grid{grid-template-columns:1fr}.head{flex-direction:column}.body,.head{padding:22px}}
+#printHeading{display:none}
+@media print {
+ @page { size: A4 landscape; margin: 8mm; }
+ html,body { width:100%!important; height:auto!important; margin:0!important; padding:0!important; background:white!important; print-color-adjust:exact!important; -webkit-print-color-adjust:exact!important; }
+ body > .wrap { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; }
+ .card,.body { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; box-shadow:none!important; overflow:visible!important; }
+ .head,.grid,.status,.actions,.preview>h2,#table,.maphead,.mapnote,.foot { display:none!important; }
+ .preview,.mapbox { display:block!important; width:100%!important; max-width:none!important; margin:0!important; padding:0!important; overflow:visible!important; }
+ #printHeading { display:block!important; margin:0 0 3mm!important; padding:0!important; color:#111; break-after:avoid!important; }
+ #printHeading h1 { font-size:16pt!important; line-height:1.2!important; margin:0 0 1mm!important; }
+ #printHeading p { font-size:8pt!important; line-height:1.2!important; margin:0!important; }
+ .mapframe { display:block!important; width:100%!important; height:169mm!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; overflow:hidden!important; break-inside:avoid!important; page-break-inside:avoid!important; background:#fff!important; }
+ .mapframe svg { display:block!important; width:100%!important; height:100%!important; }
+}
+
+[hidden]{display:none!important}.tp-mapbox{margin-top:24px}.tp-maphead{margin-bottom:10px}.tp-table-heading{margin-top:25px}.tabs{display:flex;gap:8px;padding:14px 32px 0;background:#fff;border-bottom:1px solid #dde4ee}.tab{border:0;background:transparent;padding:12px 18px;cursor:pointer;font-weight:700;color:#607387;border-bottom:3px solid transparent}.tab.active{color:#17324d;border-bottom-color:#17324d}.tp-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:18px}.tp-actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.tp-map{height:460px;border:1px solid #d6dee8;border-radius:12px;overflow:hidden}.tp-map svg{width:100%;height:100%}.tp-note{color:#64748b;font-size:13px}.tp-table{overflow:auto}.tp-table table{width:100%;border-collapse:collapse;min-width:850px}.tp-table td,.tp-table th{padding:8px;border:1px solid #d6dee8;text-align:center}.tp-table th{background:#e9eef5}.tp-table .section-row td{text-align:left;background:#dfeaf5;font-weight:700}@media(max-width:780px){.tp-grid{grid-template-columns:1fr}.tabs{padding-left:15px}}@media print{.tabs,#turningPanel{display:none!important}}
+.area-total-row td{background:#c9e3d5!important;color:#17472d;font-weight:800!important}
+</style>
+</head><body><div class="wrap"><div class="card"><header class="head"><div><h1 data-i="title">Калькулятор координат та азимутів</h1><p data-i="subtitle">Excel → азимути, відстані, площа → готовий Excel</p></div><div class="lang"><button id="ua" class="active">UA</button><button id="en">EN</button></div></header><nav class="tabs"><button class="tab active" id="tabCalc">Coordinate Calculator</button><button class="tab" id="tabTP">Turning Points Generator</button></nav><main class="body"><div id="calculatorPanel"><div class="grid">
+<div class="field"><label data-i="upload">1. Завантажте Excel з координатами</label><div class="drop"><input id="file" type="file" accept=".xlsx,.xls"><small data-i="columns">Правило: 1-ша колонка — назва точки, 2-га — Easting/X, 3-тя — Northing/Y. Назви колонок можуть бути будь-які.</small></div></div>
+<div class="field"><label data-i="zone">2. Система координат</label><select id="zone"><option value="36">WGS 1984 UTM Zone 36N</option><option value="37">WGS 1984 UTM Zone 37N</option></select></div>
+<div class="field"><label data-i="decl">3. Магнітне схилення</label><select id="decl"><option value="8">8°</option><option value="9">9°</option></select></div><div class="field"><label data-i="siteNameLabel">4. Назва ділянки</label><input id="siteName" type="text" maxlength="100" placeholder="Наприклад, Savyntsi-8S" autocomplete="off"></div></div>
+<div id="status" class="status" data-i="waiting">Завантажте Excel-файл для початку.</div><div class="actions"><button id="generate" class="primary" disabled data-i="generate">Згенерувати Excel</button></div>
+<section id="preview" class="preview" hidden><h2 data-i="preview">Попередній перегляд</h2><div id="table"></div><div class="mapbox"><div class="maphead"><h2 data-i="mapTitle">Візуалізація на карті</h2><div class="mapcontrols"><label for="basemap" data-i="basemapLabel" style="font-size:13px;font-weight:700">Підкладка</label><select id="basemap" class="basemap-select" aria-label="Basemap"><option value="satellite">Satellite Imagery</option><option value="osm">OpenStreetMap</option></select><button id="zoomIn" class="mapbtn" title="Zoom in">+</button><button id="zoomOut" class="mapbtn" title="Zoom out">−</button><button id="fitMap" class="mapbtn" data-i="fitMap">Показати всі полігони</button><button id="printMap" class="mapbtn" data-i="printMap">Друкувати карту</button></div></div><div id="printHeading"><h1 id="printTitle"></h1><p id="printSubtitle"></p></div><div id="map" class="mapframe"></div><div class="mapnote" data-i="mapNote">Контур ділянки: SP → TP1 → … → TPn → SP. LM/BM, якщо присутні, показуються окремо та не входять у площу.</div></div></section>
+</div><section id="turningPanel" hidden>
+<h2>Turning Points Generator</h2><p class="tp-note" id="tpIntro">Завантажте полігони KML, KMZ, GeoJSON, JSON або ZIP Shapefile. Перша вершина кожного полігона зберігається як SP; інші впорядковуються за годинниковою стрілкою.</p>
+<div class="tp-grid"><div class="field"><label id="tpFileLabel">1. Файл полігонів</label><div class="drop"><input type="file" id="tpFile" accept=".kml,.kmz,.geojson,.json,.zip"></div></div><div class="field"><label id="tpZoneLabel">2. UTM Zone</label><select id="tpZone"><option value="auto">Auto (per polygon)</option><option value="36">WGS 1984 UTM Zone 36N</option><option value="37">WGS 1984 UTM Zone 37N</option></select></div><div class="field"><label id="tpDeclLabel">3. Магнітне схилення</label><input id="tpDecl" type="number" step="0.1" value="8" style="width:100%;height:44px;border:1px solid #b9c5d1;border-radius:9px;padding:8px"></div></div>
+<div id="tpStatus" class="status">Очікування файлу.</div><div class="tp-actions"><button id="tpExport" class="primary" disabled>Export Excel</button><button id="tpKml" class="mapbtn" disabled>Export KML</button><button id="tpJson" class="mapbtn" disabled>Export JSON</button><button id="tpSend" class="mapbtn" disabled>Send to Coordinate Calculator</button><button id="tpPrint" class="mapbtn" disabled>Print Map</button></div>
+<div id="tpResults" hidden><div class="tp-mapbox"><div class="maphead tp-maphead"><h2 id="tpMapHeading">Попередній перегляд полігона та поворотних точок</h2><div class="mapcontrols"><select id="tpBasemap" class="basemap-select"><option value="satellite">Satellite Imagery</option><option value="osm">OpenStreetMap</option></select><button id="tpZoomIn" class="mapbtn">+</button><button id="tpZoomOut" class="mapbtn">−</button><button id="tpFit" class="mapbtn">Показати всі полігони</button></div></div><div id="tpMap" class="tp-map mapframe"></div><p class="tp-note" id="tpMapNote">Контур полігона, SP і TP1–TPn на супутниковій карті. Можна масштабувати та переміщувати карту.</p></div><h2 id="tpTableHeading" class="tp-table-heading">Таблиця координат та азимутів</h2><div class="tp-table" id="tpTable"></div></div></section>
+<div class="foot" data-i="privacy">Розрахунок виконується у вашому браузері. Файл координат не завантажується на сервер.</div></main></div></div>
+<script>
+const I={uk:{title:'Калькулятор координат та азимутів',subtitle:'Excel → азимути та відстані → готовий Excel',upload:'1. Завантажте Excel з координатами',columns:'Правило: 1-ша колонка — назва точки, 2-га — Easting/X, 3-тя — Northing/Y. Назви колонок можуть бути будь-які.',zone:'2. Система координат',decl:'3. Магнітне схилення',waiting:'Завантажте Excel-файл для початку.',generate:'Згенерувати Excel',preview:'Попередній перегляд',mapTitle:'Візуалізація на карті',mapNote:'Контур ділянки: SP → TP1 → … → TPn → SP. LM/BM, якщо присутні, показуються окремо. Карту можна масштабувати та переміщувати. Кожен SP починає окремий полігон.',fitMap:'Показати всі полігони',basemapLabel:'Підкладка',siteNameLabel:'4. Назва ділянки',printMap:'Друкувати карту',privacy:'Розрахунок виконується у вашому браузері. Файл координат не завантажується на сервер.',loaded:(n,tp,lm,bm)=>`✓ Завантажено ${n} точок\n${lm?'✓ LM знайдено':'⚠ LM не знайдено (необов’язково)'}\n${bm?'✓ BM знайдено':'⚠ BM не знайдено (необов’язково)'}\n✓ SP знайдено\n✓ Знайдено TP1–TP${tp}`,bad:'Помилка: перевірте структуру файлу та координати.',missing:x=>`Помилка: відсутні обов’язкові точки: ${x}`,area:x=>''},en:{title:'Coordinate & Bearing Calculator',subtitle:'Excel → bearings and distances → ready Excel',upload:'1. Upload coordinate Excel file',columns:'Rule: column 1 = point name, column 2 = Easting/X, column 3 = Northing/Y. Column headers may have any names.',zone:'2. Coordinate system',decl:'3. Magnetic declination',waiting:'Upload an Excel file to begin.',generate:'Generate Excel',preview:'Preview',mapTitle:'Map preview',mapNote:'Site boundary: SP → TP1 → … → TPn → SP. LM/BM, when present, are shown separately. The map can be zoomed and panned. Each SP starts a separate polygon.',fitMap:'Fit all polygons',basemapLabel:'Basemap',siteNameLabel:'4. Site / polygon name',printMap:'Print map',privacy:'Calculations run in your browser. The coordinate file is not uploaded to a server.',loaded:(n,tp,lm,bm)=>`✓ ${n} points loaded\n${lm?'✓ LM detected':'⚠ LM not found (optional)'}\n${bm?'✓ BM detected':'⚠ BM not found (optional)'}\n✓ SP detected\n✓ TP1–TP${tp} detected`,bad:'Error: check the file structure and coordinate values.',missing:x=>`Error: missing required points: ${x}`,area:x=>''}};
+let lang='uk', points=null, polygons=[], rows=null, areaVal=0;
+let mapState={z:null,cx:null,cy:null,fit:true};
+// Explicit DOM references for consistent behavior across browsers and corporate policies.
+const ua = document.getElementById('ua');
+const en = document.getElementById('en');
+const file = document.getElementById('file');
+const zone = document.getElementById('zone');
+const decl = document.getElementById('decl');
+const siteName = document.getElementById('siteName');
+const printMap = document.getElementById('printMap');
+const status = document.getElementById('status');
+const generate = document.getElementById('generate');
+const preview = document.getElementById('preview');
+const table = document.getElementById('table');
+const mapEl = document.getElementById('map');
+const basemap = document.getElementById('basemap');
+let selectedBasemap='satellite';
+basemap.value=selectedBasemap;
+basemap.addEventListener('change',()=>{selectedBasemap=basemap.value;if(points)renderMap();});
+const zoomIn=document.getElementById('zoomIn'), zoomOut=document.getElementById('zoomOut'), fitMap=document.getElementById('fitMap');
+
+function safeText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function tr(){document.documentElement.lang=lang;document.querySelectorAll('[data-i]').forEach(e=>e.textContent=I[lang][e.dataset.i]);document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('active',(lang==='uk'&&b.id==='ua')||(lang==='en'&&b.id==='en')));if(points) setLoadedStatus();render();}
+ua.onclick=()=>{lang='uk';tr()};en.onclick=()=>{lang='en';tr()};
+window.addEventListener('error', e => { if (status) setStatus((lang==='uk'?'Помилка JavaScript: ':'JavaScript error: ') + (e.message || 'Unknown error'),'err'); });
+function setStatus(t,c=''){status.className='status '+c;status.textContent=t}
+function norm(v){
+  // Normalize point names so visually identical Cyrillic/Latin labels are accepted.
+  // Examples: TP5 = ТР5, LM = LМ, BM = BМ, SP = SР; spaces are ignored.
+  return String(v??'')
+    .trim()
+    .toUpperCase()
+    .replace(/[\s\u00A0\u2007\u202F\u200B\uFEFF]+/g,'')
+    .replace(/[Т]/g,'T')
+    .replace(/[Р]/g,'P')
+    .replace(/[М]/g,'M')
+    .replace(/[В]/g,'B')
+    .replace(/[С]/g,'C')
+    .replace(/[А]/g,'A')
+    .replace(/[Е]/g,'E')
+    .replace(/[О]/g,'O')
+    .replace(/[Х]/g,'X');
+}
+function xmlText(node){return node ? node.textContent : ''}
+async function readFirstSheet(arrayBuffer){
+  if(typeof JSZip==='undefined') throw new Error(lang==='uk'?'Помилка: локальний Excel-модуль не завантажився.':'Error: local Excel module failed to load.');
+  const zip=await JSZip.loadAsync(arrayBuffer);
+  const parser=new DOMParser();
+  let shared=[];
+  const ss=zip.file('xl/sharedStrings.xml');
+  if(ss){const doc=parser.parseFromString(await ss.async('string'),'application/xml');shared=[...doc.getElementsByTagName('si')].map(si=>[...si.getElementsByTagName('t')].map(xmlText).join(''));}
+  const wbFile=zip.file('xl/workbook.xml');
+  const relFile=zip.file('xl/_rels/workbook.xml.rels');
+  if(!wbFile||!relFile) throw new Error(lang==='uk'?'Помилка: не вдалося прочитати структуру XLSX.':'Error: unable to read XLSX structure.');
+  const wbDoc=parser.parseFromString(await wbFile.async('string'),'application/xml');
+  const firstSheet=wbDoc.getElementsByTagName('sheet')[0];
+  if(!firstSheet) throw new Error(I[lang].bad);
+  const rid=firstSheet.getAttribute('r:id')||firstSheet.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+  const relDoc=parser.parseFromString(await relFile.async('string'),'application/xml');
+  const rel=[...relDoc.getElementsByTagName('Relationship')].find(r=>r.getAttribute('Id')===rid);
+  let target=rel?rel.getAttribute('Target'):'worksheets/sheet1.xml';
+  target=target.replace(/^\//,'').replace(/^xl\//,'');
+  const sheetFile=zip.file('xl/'+target);
+  if(!sheetFile) throw new Error(I[lang].bad);
+  const doc=parser.parseFromString(await sheetFile.async('string'),'application/xml');
+  const out=[];
+  for(const row of [...doc.getElementsByTagName('row')]){
+    const vals=[];
+    for(const c of [...row.getElementsByTagName('c')]){
+      const ref=c.getAttribute('r')||'A1'; const m=ref.match(/^([A-Z]+)/); let col=0;
+      for(const ch of (m?m[1]:'A')) col=col*26+ch.charCodeAt(0)-64; col--;
+      const type=c.getAttribute('t'); let val='';
+      if(type==='inlineStr'){val=[...c.getElementsByTagName('t')].map(xmlText).join('');}
+      else {const v=c.getElementsByTagName('v')[0]; val=v?xmlText(v):''; if(type==='s') val=shared[Number(val)]??'';}
+      vals[col]=val;
+    }
+    out.push(vals);
+  }
+  return out;
+}
+function escXml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function colName(n){let s='';for(n++;n;n=Math.floor((n-1)/26))s=String.fromCharCode(65+(n-1)%26)+s;return s}
+async function writeXlsx(aoa,filename){
+  const zip=new JSZip();
+  zip.file('[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`);
+  zip.folder('_rels').file('.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
+  zip.folder('xl').file('workbook.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Bearing Table" sheetId="1" r:id="rId1"/></sheets></workbook>`);
+  zip.folder('xl/_rels').file('workbook.xml.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`);
+  zip.folder('xl').file('styles.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs></styleSheet>`);
+  let rowsXml='';
+  aoa.forEach((row,ri)=>{let cells='';row.forEach((v,ci)=>{if(v===null||v===undefined||v==='')return;const r=colName(ci)+(ri+1);const st=(ri===0||(row.length===1&&ri>0))?' s="1"':'';if(typeof v==='number')cells+=`<c r="${r}"${st}><v>${v}</v></c>`;else cells+=`<c r="${r}" t="inlineStr"${st}><is><t xml:space="preserve">${escXml(v)}</t></is></c>`});rowsXml+=`<row r="${ri+1}"${ri===0?' ht="54" customHeight="1"':''}>${cells}</row>`});
+  const widths=[12,12,25,23,18,16,16].map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
+  zip.folder('xl/worksheets').file('sheet1.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols>${widths}</cols><sheetData>${rowsXml}</sheetData></worksheet>`);
+  const blob=await zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',compression:'DEFLATE'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+// Each SP starts a new polygon. Point names are scoped to that polygon.
+file.onchange=async e=>{try{
+ const f=e.target.files[0];if(!f)return;
+ const a=await readFirstSheet(await f.arrayBuffer());
+ points=new Map();polygons=[];let current=null;
+ for(const r of a.slice(1)){
+  const name=norm(r[0]);if(!name)continue;
+  const x=Number(r[1]),y=Number(r[2]);
+  if(r[1]===''||r[2]===''||!Number.isFinite(x)||!Number.isFinite(y))throw new Error(`${name}: invalid Easting/Northing`);
+  const p={name,x,y};
+  if(name==='LM'||name==='BM'){
+   if(points.has(name))throw new Error(`Duplicate shared point: ${name}`);
+   points.set(name,p);
+  }else if(name==='SP'){
+   current={id:polygons.length+1,points:new Map([['SP',p]])};polygons.push(current);
+  }else if(/^TP\d+$/.test(name)){
+   if(!current)throw new Error(`${name}: SP must precede TP points`);
+   if(current.points.has(name))throw new Error(`Polygon ${current.id}: duplicate ${name}`);
+   current.points.set(name,p);
+  }
+ }
+ validate();calculate();mapState={z:null,cx:null,cy:null,fit:true};
+ generate.disabled=false;preview.hidden=false;setLoadedStatus();render();
+}catch(err){points=null;polygons=[];rows=null;generate.disabled=true;preview.hidden=true;setStatus(err?.message||I[lang].bad,'err')}};
+function getTPs(poly){return [...poly.points.keys()].filter(x=>/^TP\d+$/.test(x)).sort((a,b)=>+a.slice(2)-+b.slice(2))}
+function setLoadedStatus(){
+ const count=polygons.reduce((n,p)=>n+p.points.size,points.size);
+ const detail=polygons.map(p=>`Polygon ${p.id}: SP + TP1–TP${getTPs(p).length}`).join('\n');
+ const base=lang==='uk'?`✓ Завантажено ${count} точок; полігонів: ${polygons.length}`:`✓ ${count} points loaded; polygons: ${polygons.length}`;
+ setStatus(`${base}\n${points.has('LM')?'✓ LM':'⚠ LM (optional)'} · ${points.has('BM')?'✓ BM':'⚠ BM (optional)'}\n${detail}`,'ok');
+}
+function validate(){
+ if(!polygons.length)throw new Error(I[lang].missing('SP'));
+ const errors=[];
+ for(const p of polygons){
+  const tps=getTPs(p);if(!tps.length){errors.push(`Polygon ${p.id}: TP1`);continue}
+  const max=Math.max(...tps.map(t=>Number(t.slice(2))));
+  for(let i=1;i<=max;i++)if(!p.points.has('TP'+i))errors.push(`Polygon ${p.id}: TP${i}`);
+  if(tps.length<2)errors.push(`Polygon ${p.id}: at least TP1 and TP2 required`);
+ }
+ if(errors.length)throw new Error(I[lang].missing(errors.join(', ')));
+}
+function bearing(a,b){let d=Math.atan2(b.x-a.x,b.y-a.y)*180/Math.PI;return(d+360)%360}
+function dist(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
+function calculate(){
+ rows=[];const dec=Number(decl.value),lm=points.get('LM'),bm=points.get('BM');
+ function add(from,to,a,b){const tb=bearing(a,b);rows.push({from,to,mag:Math.round((tb-dec+360)%360),trueb:Math.round(tb),distance:Math.round(dist(a,b)),x:Math.round(a.x),y:Math.round(a.y)})}
+ if(lm&&bm)add('LM','BM',lm,bm);
+ polygons.forEach((poly,i)=>{
+  rows.push({section:poly.id});
+  const sp=poly.points.get('SP'),anchor=bm||lm;
+  if(anchor)add(bm?'BM':'LM','SP',anchor,sp);
+  const names=['SP',...getTPs(poly),'SP'];
+  for(let j=0;j<names.length-1;j++)add(names[j],names[j+1],poly.points.get(names[j]),poly.points.get(names[j+1]));
+ });
+}
+decl.onchange=()=>{if(points){calculate();render()}};zone.onchange=()=>{if(points){mapState.fit=true;render()}};
+// Planar area in square metres, calculated from UTM coordinates (shoelace formula).
+// LM/BM are deliberately excluded; only SP and TP vertices define the boundary.
+function calculatorPolygonArea(poly){
+ const vertices=['SP',...getTPs(poly)].map(name=>poly.points.get(name));
+ if(vertices.length<3)return 0;
+ // Translate origin to the first vertex to reduce floating-point cancellation.
+ const ox=vertices[0].x,oy=vertices[0].y;
+ let twiceArea=0;
+ for(let i=0;i<vertices.length;i++){
+  const a=vertices[i],b=vertices[(i+1)%vertices.length];
+  twiceArea+=(a.x-ox)*(b.y-oy)-(b.x-ox)*(a.y-oy);
+ }
+ return Math.abs(twiceArea)/2;
+}
+function formatAreaValue(value){
+ return new Intl.NumberFormat(lang==='uk'?'uk-UA':'en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value);
+}
+function render(){if(!rows||preview.hidden)return;
+ let h='<table><thead><tr><th>Від<br>From</th><th>До<br>To</th><th>Азимут (Магнітний)<br>Magnetic bearing</th><th>Азимут (Істинний)<br>True bearing</th><th>Відстань (м)<br>Distance</th><th>Long/UTMX</th><th>Lat/UTMY</th></tr></thead><tbody>';
+ for(const r of rows){if(r.section){const poly=polygons.find(p=>p.id===r.section);const area=calculatorPolygonArea(poly);h+=`<tr class="section-row"><td colspan="7">${lang==='uk'?'Полігон':'Polygon'} ${r.section} — ${lang==='uk'?'Площа':'Area'}: ${formatAreaValue(area)} ${lang==='uk'?'м²':'m²'} (${formatAreaValue(area/10000)} ${lang==='uk'?'га':'ha'})</td></tr>`;continue}
+ h+=`<tr><td>${r.from}</td><td>${r.to}</td><td>${r.mag}</td><td>${r.trueb}</td><td>${r.distance}</td><td>${String(r.x).padStart(7,'0')}</td><td>${r.y}</td></tr>`}
+ const totalArea=polygons.reduce((sum,poly)=>sum+calculatorPolygonArea(poly),0);
+ h+=`<tr class="section-row area-total-row"><td colspan="7">${lang==='uk'?'ЗАГАЛЬНА ПЛОЩА ВСІХ ПОЛІГОНІВ':'TOTAL AREA OF ALL POLYGONS'}: ${formatAreaValue(totalArea)} ${lang==='uk'?'м²':'m²'} (${formatAreaValue(totalArea/10000)} ${lang==='uk'?'га':'ha'})</td></tr>`;
+ table.innerHTML=h+'</tbody></table>';renderMap();}
+function utmToLatLon(E,N,zoneNum){
+  const a=6378137.0, eccSquared=0.00669438, k0=0.9996;
+  const eccPrimeSquared=eccSquared/(1-eccSquared); const e1=(1-Math.sqrt(1-eccSquared))/(1+Math.sqrt(1-eccSquared));
+  const x=E-500000.0, y=N; const LongOrigin=(zoneNum-1)*6-180+3;
+  const M=y/k0; const mu=M/(a*(1-eccSquared/4-3*eccSquared*eccSquared/64-5*eccSquared**3/256));
+  const phi1Rad=mu+(3*e1/2-27*e1**3/32)*Math.sin(2*mu)+(21*e1*e1/16-55*e1**4/32)*Math.sin(4*mu)+(151*e1**3/96)*Math.sin(6*mu)+(1097*e1**4/512)*Math.sin(8*mu);
+  const N1=a/Math.sqrt(1-eccSquared*Math.sin(phi1Rad)**2), T1=Math.tan(phi1Rad)**2, C1=eccPrimeSquared*Math.cos(phi1Rad)**2;
+  const R1=a*(1-eccSquared)/Math.pow(1-eccSquared*Math.sin(phi1Rad)**2,1.5), D=x/(N1*k0);
+  let lat=phi1Rad-(N1*Math.tan(phi1Rad)/R1)*(D*D/2-(5+3*T1+10*C1-4*C1*C1-9*eccPrimeSquared)*D**4/24+(61+90*T1+298*C1+45*T1*T1-252*eccPrimeSquared-3*C1*C1)*D**6/720);
+  lat=lat*180/Math.PI;
+  let lon=(D-(1+2*T1+C1)*D**3/6+(5-2*C1+28*T1-3*C1*C1+8*eccPrimeSquared+24*T1*T1)*D**5/120)/Math.cos(phi1Rad);
+  lon=LongOrigin+lon*180/Math.PI; return {lat,lon};
+}
+function worldPx(lat,lon,z){const n=2**z*256;const x=(lon+180)/360*n;const s=Math.sin(lat*Math.PI/180);const y=(0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*n;return{x,y}}
+function getMapGeo(){
+ const zn=Number(zone.value),geo=[];
+ for(const poly of polygons)for(const [name,p] of poly.points){const key=`${poly.id}:${name}`;geo.push({key,name,polyId:poly.id,...utmToLatLon(p.x,p.y,zn),utm:p})}
+ for(const name of ['LM','BM'])if(points.has(name)){const p=points.get(name);geo.push({key:name,name,polyId:0,...utmToLatLon(p.x,p.y,zn),utm:p})}
+ return {zn,geo};
+}
+function fitMapView(){
+  if(!points)return; const {geo}=getMapGeo(), W=Math.max(mapEl.clientWidth||1000,320),H=460,pad=60; let z=19,pix;
+  for(;z>=3;z--){pix=geo.map(g=>({...g,...worldPx(g.lat,g.lon,z)}));const xs=pix.map(p=>p.x),ys=pix.map(p=>p.y);if(Math.max(...xs)-Math.min(...xs)<=W-pad*2&&Math.max(...ys)-Math.min(...ys)<=H-pad*2)break;}
+  const xs=pix.map(p=>p.x),ys=pix.map(p=>p.y); mapState={z,cx:(Math.min(...xs)+Math.max(...xs))/2,cy:(Math.min(...ys)+Math.max(...ys))/2,fit:false};
+}
+function interiorLabelPoint(vertices){
+  // Area-weighted polygon centroid; if outside a concave polygon,
+  // find a point inside using horizontal scanline intersections.
+  let twiceArea=0,cx=0,cy=0;
+  for(let i=0;i<vertices.length;i++){
+    const a=vertices[i],b=vertices[(i+1)%vertices.length];
+    const cross=a.sx*b.sy-b.sx*a.sy;
+    twiceArea+=cross;cx+=(a.sx+b.sx)*cross;cy+=(a.sy+b.sy)*cross;
+  }
+  const inside=(x,y)=>{
+    let hit=false;
+    for(let i=0,j=vertices.length-1;i<vertices.length;j=i++){
+      const a=vertices[i],b=vertices[j];
+      if((a.sy>y)!==(b.sy>y) && x<(b.sx-a.sx)*(y-a.sy)/(b.sy-a.sy)+a.sx)hit=!hit;
+    }
+    return hit;
+  };
+  if(Math.abs(twiceArea)>1e-7){
+    cx/=3*twiceArea;cy/=3*twiceArea;
+    if(inside(cx,cy))return {x:cx,y:cy};
+  }
+  const ys=vertices.map(p=>p.sy),minY=Math.min(...ys),maxY=Math.max(...ys);
+  let best=null;
+  for(let k=1;k<=45;k++){
+    const y=minY+(maxY-minY)*k/46, intersections=[];
+    for(let i=0;i<vertices.length;i++){
+      const a=vertices[i],b=vertices[(i+1)%vertices.length];
+      if((a.sy<=y&&b.sy>y)||(b.sy<=y&&a.sy>y))
+        intersections.push(a.sx+(y-a.sy)*(b.sx-a.sx)/(b.sy-a.sy));
+    }
+    intersections.sort((a,b)=>a-b);
+    for(let j=0;j+1<intersections.length;j+=2){
+      const width=intersections[j+1]-intersections[j];
+      if(width>0&&(!best||width>best.width))best={x:(intersections[j]+intersections[j+1])/2,y,width};
+    }
+  }
+  return best||{x:vertices[0].sx,y:vertices[0].sy};
+}
+function renderMap(){
+  if(!points||!mapEl)return; if(mapState.fit||mapState.z===null)fitMapView();
+  const {zn,geo}=getMapGeo(), W=Math.max(mapEl.clientWidth||1000,320),H=460,z=mapState.z;
+  const pix=geo.map(g=>({...g,...worldPx(g.lat,g.lon,z)}));
+  const left=mapState.cx-W/2,top=mapState.cy-H/2,tx0=Math.floor(left/256),tx1=Math.floor((left+W)/256),ty0=Math.floor(top/256),ty1=Math.floor((top+H)/256);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  for(let tx=tx0;tx<=tx1;tx++)for(let ty=ty0;ty<=ty1;ty++){
+    const n=2**z;if(ty<0||ty>=n)continue;
+    const wrappedX=((tx%n)+n)%n;
+    const tileUrl=selectedBasemap==='satellite'
+      ? `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${ty}/${wrappedX}`
+      : `https://tile.openstreetmap.org/${z}/${wrappedX}/${ty}.png`;
+    svg+=`<image href="${tileUrl}" x="${tx*256-left}" y="${ty*256-top}" width="256" height="256"/>`;
+  }
+  const pp=Object.fromEntries(pix.map(p=>[p.key,{...p,sx:p.x-left,sy:p.y-top}]));
+  const colors=['#d52b32','#087e8b','#7849a8','#b76a00','#26703e'];
+  for(const poly of polygons){
+   const color=colors[(poly.id-1)%colors.length],tps=getTPs(poly),names=['SP',...tps,'SP'];
+   const boundary=names.map(n=>{const p=pp[`${poly.id}:${n}`];return `${p.sx},${p.sy}`}).join(' ');
+   svg+=`<polygon points="${boundary}" fill="${color}" fill-opacity="0.20" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>`;
+   for(const n of ['SP',...tps]){const p=pp[`${poly.id}:${n}`];svg+=`<circle cx="${p.sx}" cy="${p.sy}" r="5" fill="#fff" stroke="${color}" stroke-width="3"><title>Polygon ${poly.id} · ${n}: Easting ${p.utm.x}, Northing ${p.utm.y}</title></circle><text x="${p.sx+8}" y="${p.sy-8}" font-size="13" font-weight="700" fill="${color}" paint-order="stroke" stroke="#fff" stroke-width="4">${n}</text>`;}
+   const vertices=['SP',...tps].map(n=>pp[`${poly.id}:${n}`]);
+   const labelPoint=interiorLabelPoint(vertices);
+   const siteLabel=siteName.value.trim();
+   const polyLabel=siteLabel?(polygons.length>1?`${siteLabel} · ${lang==='uk'?'Полігон':'Polygon'} ${poly.id}`:siteLabel):`${lang==='uk'?'Полігон':'Polygon'} ${poly.id}`;
+   svg+=`<text x="${labelPoint.x}" y="${labelPoint.y}" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="700" fill="#fff" paint-order="stroke" stroke="#152a42" stroke-width="4" stroke-linejoin="round">${safeText(polyLabel)}</text>`;
+  }
+  for(const n of ['LM','BM'])if(pp[n]){const p=pp[n];svg+=`<circle cx="${p.sx}" cy="${p.sy}" r="7" fill="#f0a000" stroke="#fff" stroke-width="2"><title>${n}: Easting ${p.utm.x}, Northing ${p.utm.y}</title></circle><text x="${p.sx+10}" y="${p.sy-10}" font-size="15" font-weight="700" fill="#8a5700" paint-order="stroke" stroke="#fff" stroke-width="4">${n}</text>`;}
+  const attribution=selectedBasemap==='satellite'?'Imagery: Esri, Maxar, Earthstar Geographics, and GIS User Community':'© OpenStreetMap contributors';
+  svg+=`<rect x="8" y="${H-27}" width="${selectedBasemap==='satellite'?490:250}" height="20" rx="4" fill="rgba(255,255,255,.88)"/><text x="14" y="${H-12}" font-size="11" fill="#333">${attribution} · UTM Zone ${zn}N</text></svg>`; mapEl.innerHTML=svg;
+}
+function zoomMap(delta,anchorX=null,anchorY=null){
+  if(!points)return; const oldZ=mapState.z,newZ=Math.max(3,Math.min(20,oldZ+delta)); if(newZ===oldZ)return;
+  const W=Math.max(mapEl.clientWidth||1000,320),H=460, ax=anchorX??W/2, ay=anchorY??H/2, scale=2**(newZ-oldZ);
+  const worldX=mapState.cx-W/2+ax, worldY=mapState.cy-H/2+ay;
+  mapState.cx=worldX*scale-ax+W/2; mapState.cy=worldY*scale-ay+H/2; mapState.z=newZ; renderMap();
+}
+siteName.addEventListener('input',()=>{if(points)renderMap()});
+printMap.addEventListener('click',()=>{if(!points){setStatus(I[lang].waiting,'warn');return;}document.getElementById('printTitle').textContent=siteName.value.trim()|| (lang==='uk'?'Карта ділянки':'Site map');document.getElementById('printSubtitle').textContent=`WGS 1984 UTM Zone ${zone.value}N · ${selectedBasemap==='satellite'?'Satellite Imagery':'OpenStreetMap'}`;window.print();});
+zoomIn.onclick=()=>zoomMap(1); zoomOut.onclick=()=>zoomMap(-1); fitMap.onclick=()=>{mapState.fit=true;renderMap()};
+mapEl.addEventListener('wheel',e=>{e.preventDefault();const r=mapEl.getBoundingClientRect();zoomMap(e.deltaY<0?1:-1,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+let drag=null, touches=new Map(), pinchDist=null;
+mapEl.addEventListener('pointerdown',e=>{mapEl.setPointerCapture(e.pointerId);touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===1){drag={x:e.clientX,y:e.clientY,cx:mapState.cx,cy:mapState.cy};mapEl.classList.add('dragging')}else if(touches.size===2){const a=[...touches.values()];pinchDist=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)}});
+mapEl.addEventListener('pointermove',e=>{if(!touches.has(e.pointerId))return;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(touches.size===1&&drag){mapState.cx=drag.cx-(e.clientX-drag.x);mapState.cy=drag.cy-(e.clientY-drag.y);renderMap()}else if(touches.size===2){const a=[...touches.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(pinchDist&&Math.abs(d-pinchDist)>35){zoomMap(d>pinchDist?1:-1);pinchDist=d}}});
+function endPointer(e){touches.delete(e.pointerId);if(touches.size===0){drag=null;pinchDist=null;mapEl.classList.remove('dragging')}}
+mapEl.addEventListener('pointerup',endPointer);mapEl.addEventListener('pointercancel',endPointer);
+window.addEventListener('resize',()=>{if(points&&!preview.hidden)renderMap()});
+
+
+generate.onclick=async()=>{calculate();render();const aoa=[['Від\nFrom','До\nTo','Азимут (Магнітний)\nMagnetic bearing','Азимут (Істинний)\nTrue bearing','Відстань(м)\nDistance','Long/UTMX','Lat/UTMY'],...rows.map(r=>r.section?[`${lang==='uk'?'Полігон':'Polygon'} ${r.section}`]:[r.from,r.to,r.mag,r.trueb,r.distance,String(r.x).padStart(7,'0'),r.y])];await writeXlsx(aoa,'bearing_calculation.xlsx')};
+
+// Turning Points Generator (KML, KMZ, GeoJSON); no server uploads.
+const tp = id=>document.getElementById(id);
+let tpPolys=[],tpRows=[],tpMapState={z:null,cx:null,cy:null,fit:true};
+function switchTab(which){const calc=which==='calc';tp('calculatorPanel').hidden=!calc;tp('turningPanel').hidden=calc;tp('tabCalc').classList.toggle('active',calc);tp('tabTP').classList.toggle('active',!calc);if(!calc&&tpPolys.length)tpRenderMap();else if(calc&&points)renderMap();}
+tp('tabCalc').onclick=()=>switchTab('calc');tp('tabTP').onclick=()=>switchTab('tp');
+function tpRound(v){return Math.floor(v+0.5)}
+function tpUtm(lon,lat,zn){
+ const rad=Math.PI/180,a=6378137,e2=0.00669437999014,ep2=e2/(1-e2),k=.9996;
+ const phi=lat*rad,lam=lon*rad,lam0=((zn-1)*6-180+3)*rad;
+ const N=a/Math.sqrt(1-e2*Math.sin(phi)**2),T=Math.tan(phi)**2,C=ep2*Math.cos(phi)**2,A=Math.cos(phi)*(lam-lam0);
+ const M=a*((1-e2/4-3*e2**2/64-5*e2**3/256)*phi-(3*e2/8+3*e2**2/32+45*e2**3/1024)*Math.sin(2*phi)+(15*e2**2/256+45*e2**3/1024)*Math.sin(4*phi)-(35*e2**3/3072)*Math.sin(6*phi));
+ return {x:k*N*(A+(1-T+C)*A**3/6+(5-18*T+T*T+72*C-58*ep2)*A**5/120)+500000,y:k*(M+N*Math.tan(phi)*(A*A/2+(5-T+9*C+4*C*C)*A**4/24+(61-58*T+T*T+600*C-330*ep2)*A**6/720))+(lat<0?10000000:0)};
+}
+function tpInverse(a,b){ // Vincenty inverse WGS84, spherical fallback
+ const f=1/298.257223563,aa=6378137,bb=aa*(1-f),r=Math.PI/180;
+ const U1=Math.atan((1-f)*Math.tan(a[1]*r)),U2=Math.atan((1-f)*Math.tan(b[1]*r)),L=(b[0]-a[0])*r;
+ let lambda=L,sinSigma=0,cosSigma=0,sigma=0,sinAlpha=0,cos2Alpha=0,cos2SigmaM=0,converged=false;
+ for(let i=0;i<200;i++){
+ const sl=Math.sin(lambda),cl=Math.cos(lambda);
+ sinSigma=Math.hypot(Math.cos(U2)*sl,Math.cos(U1)*Math.sin(U2)-Math.sin(U1)*Math.cos(U2)*cl);
+ if(sinSigma<1e-15)return {distance:0,bearing:0};
+ cosSigma=Math.sin(U1)*Math.sin(U2)+Math.cos(U1)*Math.cos(U2)*cl;sigma=Math.atan2(sinSigma,cosSigma);
+ sinAlpha=Math.cos(U1)*Math.cos(U2)*sl/sinSigma;cos2Alpha=1-sinAlpha*sinAlpha;
+ cos2SigmaM=cos2Alpha>1e-15?cosSigma-2*Math.sin(U1)*Math.sin(U2)/cos2Alpha:0;
+ const C=f/16*cos2Alpha*(4+f*(4-3*cos2Alpha));const old=lambda;
+ lambda=L+(1-C)*f*sinAlpha*(sigma+C*sinSigma*(cos2SigmaM+C*cosSigma*(-1+2*cos2SigmaM**2)));
+ if(Math.abs(lambda-old)<1e-12){converged=true;break;}
+ }
+ if(!converged){const dlat=(b[1]-a[1])*r,dlon=(b[0]-a[0])*r,h=Math.sin(dlat/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(dlon/2)**2;return {distance:6371008.8*2*Math.asin(Math.min(1,Math.sqrt(h))),bearing:(Math.atan2(Math.sin(dlon)*Math.cos(b[1]*r),Math.cos(a[1]*r)*Math.sin(b[1]*r)-Math.sin(a[1]*r)*Math.cos(b[1]*r)*Math.cos(dlon))*180/Math.PI+360)%360};}
+ const u2=cos2Alpha*(aa*aa-bb*bb)/(bb*bb),A=1+u2/16384*(4096+u2*(-768+u2*(320-175*u2))),B=u2/1024*(256+u2*(-128+u2*(74-47*u2)));
+ const delta=B*sinSigma*(cos2SigmaM+B/4*(cosSigma*(-1+2*cos2SigmaM**2)-B/6*cos2SigmaM*(-3+4*sinSigma**2)*(-3+4*cos2SigmaM**2)));
+ return {distance:bb*A*(sigma-delta),bearing:(Math.atan2(Math.cos(U2)*Math.sin(lambda),Math.cos(U1)*Math.sin(U2)-Math.sin(U1)*Math.cos(U2)*Math.cos(lambda))*180/Math.PI+360)%360};
+}
+function tpSigned(r){let a=0;for(let i=0;i<r.length;i++){const p=r[i],q=r[(i+1)%r.length];a+=p[0]*q[1]-q[0]*p[1]}return a/2}
+function tpClean(r){let pts=r.map(p=>[Number(p[0]),Number(p[1])]);if(pts.length>1&&pts[0][0]===pts.at(-1)[0]&&pts[0][1]===pts.at(-1)[1])pts.pop();if(pts.length<3||pts.some(p=>!p.every(Number.isFinite)||Math.abs(p[0])>180||Math.abs(p[1])>90))throw Error('Invalid polygon coordinates (expected WGS84 longitude, latitude).');if(tpSigned(pts)>0)pts=[pts[0],...pts.slice(1).reverse()];return pts}
+function tpGeojson(obj){let result=[];function geom(g,name){if(!g)return;if(g.type==='Polygon')result.push({name,ring:tpClean(g.coordinates[0])});else if(g.type==='MultiPolygon')g.coordinates.forEach((p,i)=>result.push({name:name+' '+(i+1),ring:tpClean(p[0])}));else if(g.type==='GeometryCollection')g.geometries.forEach((x,i)=>geom(x,name+' '+(i+1)));}
+ if(obj.type==='FeatureCollection')obj.features.forEach((f,i)=>geom(f.geometry,String(f.properties?.name||f.properties?.Name||'Polygon '+(i+1))));else if(obj.type==='Feature')geom(obj.geometry,String(obj.properties?.name||'Polygon 1'));else geom(obj,'Polygon 1');return result;}
+function tpKmlParse(xml){const doc=new DOMParser().parseFromString(xml,'application/xml');if(doc.querySelector('parsererror'))throw Error('Invalid KML XML');const res=[];const placemarks=[...doc.getElementsByTagName('*')].filter(e=>e.localName==='Placemark');for(const [i,pm] of placemarks.entries()){const name=[...pm.children].find(e=>e.localName==='name')?.textContent?.trim()||'Polygon '+(i+1);const polygons=[...pm.getElementsByTagName('*')].filter(e=>e.localName==='Polygon');for(const [j,poly] of polygons.entries()){const outer=[...poly.getElementsByTagName('*')].find(e=>e.localName==='outerBoundaryIs');const coord=outer&&[...outer.getElementsByTagName('*')].find(e=>e.localName==='coordinates');if(!coord)continue;const ring=coord.textContent.trim().split(/\s+/).map(x=>x.split(',').slice(0,2).map(Number));res.push({name:polygons.length>1?name+' '+(j+1):name,ring:tpClean(ring)});}}return res;}
+// Local Shapefile reader: polygon SHP (types 5/15/25), optional DBF names, PRJ required.
+function tpShpCrs(prj){
+ const t=prj.toUpperCase();
+ if(/3857|900913|PSEUDO[_ ]?MERCATOR|WEB[_ ]?MERCATOR|MERCATOR_AUXILIARY_SPHERE/.test(t))return 3857;
+ if(/32636|UTM[_ ]ZONE[_ ]36N|UTM ZONE 36N/.test(t))return 32636;
+ if(/32637|UTM[_ ]ZONE[_ ]37N|UTM ZONE 37N/.test(t))return 32637;
+ if(/4326|GCS_WGS_1984|WGS[_ ]?84|WGS 1984/.test(t)&&!/PROJCS|PROJCRS|PROJECTEDCRS/.test(t))return 4326;
+ throw Error('Unsupported shapefile CRS. Export to WGS 1984 (EPSG:4326) or WGS 1984 UTM 36N/37N.');
+}
+function tpToLonLat(x,y,wkid){
+ if(wkid===4326)return [x,y];
+ if(wkid===32636||wkid===32637){const p=utmToLatLon(x,y,wkid-32600);return [p.lon,p.lat];}
+ if(wkid===3857)return [x*180/(Math.PI*6378137),(2*Math.atan(Math.exp(y/6378137))-Math.PI/2)*180/Math.PI];
+ throw Error('Unsupported coordinate reference system: '+wkid);
+}
+function tpDbfNames(buffer){
+ if(!buffer)return [];
+ const v=new DataView(buffer),count=v.getUint32(4,true),head=v.getUint16(8,true),size=v.getUint16(10,true),fields=[];
+ if(head>buffer.byteLength||size<1)throw Error('Invalid DBF');
+ for(let off=32,position=1;off+32<=head&&v.getUint8(off)!==13;off+=32){
+  const bytes=new Uint8Array(buffer,off,11),name=new TextDecoder('ascii').decode(bytes).replace(/\0.*$/,'').trim();
+  fields.push({name,offset:position,length:v.getUint8(off+16)});position+=v.getUint8(off+16);
+ }
+ const nameField=fields.find(f=>/^(name|polygon_name|site_name|title|назва)$/i.test(f.name));
+ const names=[];if(!nameField)return names;
+ const dec=new TextDecoder('utf-8',{fatal:false});
+ for(let i=0;i<count&&head+(i+1)*size<=buffer.byteLength;i++){
+  const off=head+i*size;if(v.getUint8(off)===42){names.push('');continue;}
+  names.push(dec.decode(new Uint8Array(buffer,off+nameField.offset,nameField.length)).replace(/\0/g,'').trim());
+ }
+ return names;
+}
+function tpParseShp(buffer,wkid,names,prefix){
+ const v=new DataView(buffer),out=[];
+ if(v.byteLength<100||v.getInt32(0,false)!==9994)throw Error('Invalid .shp file');
+ const shape=v.getInt32(32,true);
+ if(![5,15,25].includes(shape))throw Error('Shapefile must contain polygons (Polygon / PolygonZ / PolygonM).');
+ let off=100,record=0;
+ while(off+8<=v.byteLength){
+  const bytes=v.getInt32(off+4,false)*2,begin=off+8,stop=begin+bytes;off=stop;
+  if(bytes<4||stop>v.byteLength)throw Error('Damaged SHP record');
+  const type=v.getInt32(begin,true);if(type===0){record++;continue;}
+  if(![5,15,25].includes(type)||bytes<44)throw Error('Unsupported SHP geometry');
+  const parts=v.getInt32(begin+36,true),n=v.getInt32(begin+40,true),partStart=begin+44,pointStart=partStart+4*parts;
+  if(parts<1||n<3||pointStart+16*n>stop)throw Error('Invalid polygon parts in SHP');
+  const starts=[];for(let i=0;i<parts;i++)starts.push(v.getInt32(partStart+4*i,true));starts.push(n);
+  const rings=[];
+  for(let i=0;i<parts;i++){
+   const ring=[];for(let j=starts[i];j<starts[i+1];j++)ring.push(tpToLonLat(v.getFloat64(pointStart+j*16,true),v.getFloat64(pointStart+j*16+8,true),wkid));
+   if(ring.length>=4)rings.push(ring);
+  }
+  // Shapefile exterior rings are clockwise in their native planar coordinates.
+  // For multipart polygons, positive signed area after conversion indicates a hole.
+  const outer=rings.filter(r=>tpSigned(r)<0);
+  const selected=outer.length?outer:rings.slice(0,1);
+  selected.forEach((ring,i)=>out.push({name:(names[record]||prefix+' '+(record+1))+(selected.length>1?' '+(i+1):''),ring:tpClean(ring)}));
+  record++;
+ }
+ return out;
+}
+async function tpReadShpZip(file){
+ if(typeof JSZip==='undefined')throw Error('JSZip module not loaded');
+ const zip=await JSZip.loadAsync(await file.arrayBuffer());
+ const entries=Object.values(zip.files).filter(x=>!x.dir&&!x.name.startsWith('__MACOSX/'));
+ const shps=entries.filter(x=>/\.shp$/i.test(x.name));
+ if(!shps.length)throw Error('ZIP does not contain a .shp file');
+ let result=[];
+ for(const shp of shps){
+  const stem=shp.name.replace(/\.shp$/i,'');
+  const find=ext=>entries.find(x=>x.name.toLowerCase()===(stem+'.'+ext).toLowerCase());
+  const prj=find('prj');if(!prj)throw Error('Missing .prj for '+shp.name+'. Export with a defined coordinate system.');
+  const wkid=tpShpCrs(await prj.async('string'));
+  const dbf=find('dbf');const names=dbf?tpDbfNames(await dbf.async('arraybuffer')):[];
+  result.push(...tpParseShp(await shp.async('arraybuffer'),wkid,names,stem.split('/').pop()));
+ }
+ return result;
+}
+function tpArcgisJson(obj){
+ const out=[];
+ function add(g,name,crs){
+  if(!g)return;
+  const wkid=Number(g.spatialReference?.latestWkid||g.spatialReference?.wkid||crs||4326);
+  if(![4326,32636,32637,3857,102100].includes(wkid))throw Error('Unsupported ArcGIS JSON WKID: '+wkid);
+  const rings=g.rings||[];const converted=rings.map(r=>r.map(p=>tpToLonLat(Number(p[0]),Number(p[1]),wkid===102100?3857:wkid)));
+  const outer=converted.filter(r=>tpSigned(r)<0),selected=outer.length?outer:converted.slice(0,1);
+  selected.forEach((r,i)=>out.push({name:name+(selected.length>1?' '+(i+1):''),ring:tpClean(r)}));
+ }
+ if(Array.isArray(obj.features)&&obj.features.some(f=>f.geometry?.rings))obj.features.forEach((f,i)=>add(f.geometry,String(f.attributes?.name||f.attributes?.Name||'Polygon '+(i+1)),obj.spatialReference?.latestWkid||obj.spatialReference?.wkid));
+ else if(obj.rings)add(obj,'Polygon 1');
+ return out;
+}
+async function tpReadFile(f){
+ const ext=f.name.toLowerCase().split('.').pop();
+ if(ext==='geojson'||ext==='json'){
+  const obj=JSON.parse((await f.text()).replace(/^\uFEFF/,''));
+  const arc=tpArcgisJson(obj);return arc.length?arc:tpGeojson(obj);
+ }
+ if(ext==='zip')return tpReadShpZip(f);
+ if(ext==='kml')return tpKmlParse(await f.text());
+ if(ext==='kmz'){if(typeof JSZip==='undefined')throw Error('JSZip module not loaded');const z=await JSZip.loadAsync(await f.arrayBuffer());const k=Object.keys(z.files).find(x=>x.toLowerCase().endsWith('.kml'));if(!k)throw Error('KMZ contains no KML');return tpKmlParse(await z.file(k).async('string'));}
+ throw Error('Unsupported format');
+}
+function tpCalculate(){const d=Number(tp('tpDecl').value);if(!Number.isFinite(d))throw Error('Invalid declination');tpRows=[];for(let i=0;i<tpPolys.length;i++){const poly=tpPolys[i],ring=poly.ring;poly.zone=tp('tpZone').value==='auto'?Math.min(60,Math.max(1,Math.floor((ring[0][0]+180)/6)+1)):Number(tp('tpZone').value);tpRows.push({section:i+1,name:poly.name});for(let j=0;j<ring.length;j++){const from=j?'TP'+j:'SP',to=j===ring.length-1?'SP':'TP'+(j+1),geo=tpInverse(ring[j],ring[(j+1)%ring.length]),utm=tpUtm(...ring[j],poly.zone);tpRows.push({poly:i+1,from,to,mag:tpRound((geo.bearing-d+3600)%360),trueb:tpRound(geo.bearing)%360,distance:tpRound(geo.distance),x:tpRound(utm.x),y:tpRound(utm.y),zone:poly.zone,lon:ring[j][0],lat:ring[j][1]});}}}
+function tpAoa(){return [['Від\nFrom','До\nTo','Азимут (Магнітний)\nMagnetic bearing','Азимут (Істинний)\nTrue bearing','Відстань(м)\nDistance','Long/UTMX','Lat/UTMY','UTM Zone'],...tpRows.map(r=>r.section?[`${r.name} (Polygon ${r.section})`]:[r.from,r.to,r.mag,r.trueb,r.distance,String(r.x).padStart(7,'0'),r.y,r.zone+'N'])]}
+function tpRenderTable(){let html='<table><thead><tr>'+tpAoa()[0].map(v=>'<th>'+safeText(v).replace(/\n/g,'<br>')+'</th>').join('')+'</tr></thead><tbody>';for(const r of tpRows){if(r.section){html+='<tr class="section-row"><td colspan="8">'+safeText(r.name)+' · Polygon '+r.section+'</td></tr>';}else html+='<tr>'+[r.from,r.to,r.mag,r.trueb,r.distance,String(r.x).padStart(7,'0'),r.y,r.zone+'N'].map(v=>'<td>'+safeText(v)+'</td>').join('')+'</tr>';}tp('tpTable').innerHTML=html+'</tbody></table>';}
+function tpFitMap(){const W=Math.max(tp('tpMap').clientWidth,320),H=460,pad=65,all=tpPolys.flatMap(p=>p.ring);let z=19,px;for(;z>=3;z--){px=all.map(p=>worldPx(p[1],p[0],z));if(Math.max(...px.map(p=>p.x))-Math.min(...px.map(p=>p.x))<W-2*pad&&Math.max(...px.map(p=>p.y))-Math.min(...px.map(p=>p.y))<H-2*pad)break;}tpMapState={z,cx:(Math.min(...px.map(p=>p.x))+Math.max(...px.map(p=>p.x)))/2,cy:(Math.min(...px.map(p=>p.y))+Math.max(...px.map(p=>p.y)))/2,fit:false};}
+function tpRenderMap(){if(!tpPolys.length)return;if(tpMapState.fit||tpMapState.z===null)tpFitMap();const W=Math.max(tp('tpMap').clientWidth,320),H=460,z=tpMapState.z,left=tpMapState.cx-W/2,top=tpMapState.cy-H/2,n=2**z;let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;for(let x=Math.floor(left/256);x<=Math.floor((left+W)/256);x++)for(let y=Math.floor(top/256);y<=Math.floor((top+H)/256);y++){if(y<0||y>=n)continue;const xx=((x%n)+n)%n,url=tp('tpBasemap').value==='satellite'?`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${xx}`:`https://tile.openstreetmap.org/${z}/${xx}/${y}.png`;svg+=`<image href="${url}" x="${x*256-left}" y="${y*256-top}" width="256" height="256"/>`;}
+ const colors=['#d52b32','#087e8b','#7849a8','#b76a00','#26703e'];tpPolys.forEach((poly,i)=>{const color=colors[i%colors.length],pts=poly.ring.map(p=>{const v=worldPx(p[1],p[0],z);return {sx:v.x-left,sy:v.y-top}});svg+=`<polygon points="${pts.map(p=>p.sx+','+p.sy).join(' ')}" fill="${color}" fill-opacity=".20" stroke="${color}" stroke-width="3"/>`;pts.forEach((p,j)=>{const name=j?'TP'+j:'SP';svg+=`<circle cx="${p.sx}" cy="${p.sy}" r="5" fill="white" stroke="${color}" stroke-width="3"/><text x="${p.sx+8}" y="${p.sy-8}" font-size="13" font-weight="700" fill="${color}" stroke="white" stroke-width="3" paint-order="stroke">${name}</text>`;});const label=interiorLabelPoint(pts);svg+=`<text x="${label.x}" y="${label.y}" text-anchor="middle" font-size="14" font-weight="700" fill="white" stroke="#152a42" stroke-width="4" paint-order="stroke">${safeText(poly.name)}</text>`;});svg+=`<rect x="8" y="${H-26}" width="440" height="19" rx="4" fill="white" opacity=".85"/><text x="13" y="${H-12}" font-size="11" fill="#333">${tp('tpBasemap').value==='satellite'?'Imagery: Esri, Maxar, Earthstar Geographics':'© OpenStreetMap contributors'}</text></svg>`;tp('tpMap').innerHTML=svg;}
+function tpZoom(delta,anchorX=null,anchorY=null){if(!tpPolys.length)return;if(tpMapState.fit||tpMapState.z===null)tpFitMap();const old=tpMapState.z,now=Math.min(20,Math.max(3,old+delta));if(now===old)return;const W=Math.max(tp('tpMap').clientWidth,320),H=460,ax=anchorX??W/2,ay=anchorY??H/2,scale=2**(now-old);const wx=tpMapState.cx-W/2+ax,wy=tpMapState.cy-H/2+ay;tpMapState.cx=wx*scale-ax+W/2;tpMapState.cy=wy*scale-ay+H/2;tpMapState.z=now;tpRenderMap();}
+tp('tpZoomIn').onclick=()=>tpZoom(1);tp('tpZoomOut').onclick=()=>tpZoom(-1);tp('tpFit').onclick=()=>{tpMapState.fit=true;tpRenderMap()};tp('tpBasemap').onchange=tpRenderMap;
+tp('tpMap').addEventListener('wheel',e=>{e.preventDefault();const r=tp('tpMap').getBoundingClientRect();tpZoom(e.deltaY<0?1:-1,e.clientX-r.left,e.clientY-r.top)},{passive:false});let tpDrag=null;tp('tpMap').addEventListener('pointerdown',e=>{tp('tpMap').setPointerCapture(e.pointerId);tpDrag={x:e.clientX,y:e.clientY,cx:tpMapState.cx,cy:tpMapState.cy}});tp('tpMap').addEventListener('pointermove',e=>{if(!tpDrag)return;tpMapState.cx=tpDrag.cx-(e.clientX-tpDrag.x);tpMapState.cy=tpDrag.cy-(e.clientY-tpDrag.y);tpRenderMap()});['pointerup','pointercancel'].forEach(n=>tp('tpMap').addEventListener(n,()=>tpDrag=null));
+tp('tpFile').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;tpPolys=await tpReadFile(f);if(!tpPolys.length)throw Error('No polygon geometries found');tpCalculate();tpRenderTable();tp('tpResults').hidden=false;tpMapState.fit=true;tpRenderMap();['tpExport','tpKml','tpJson','tpSend','tpPrint'].forEach(id=>tp(id).disabled=false);tp('tpStatus').className='status ok';tp('tpStatus').textContent=`✓ ${tpPolys.length} polygons · ${tpPolys.reduce((n,p)=>n+p.ring.length,0)} turning points`; }catch(err){tpPolys=[];tpRows=[];tp('tpResults').hidden=true;['tpExport','tpKml','tpJson','tpSend','tpPrint'].forEach(id=>tp(id).disabled=true);tp('tpStatus').className='status err';tp('tpStatus').textContent=err.message;}};
+['tpZone','tpDecl'].forEach(id=>tp(id).addEventListener('change',()=>{if(tpPolys.length){try{tpCalculate();tpRenderTable();tpRenderMap()}catch(err){tp('tpStatus').textContent=err.message}}}));
+tp('tpExport').onclick=()=>writeXlsx(tpAoa(),'turning_points_bearings.xlsx');
+function tpDownload(data,name,type){const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1000)}
+// Export generated vertices as GeoJSON Point features in WGS84 (EPSG:4326).
+// Keep full-precision source coordinates and attach calculated bearing/distance attributes.
+tp('tpJson').onclick=()=>{
+ if(!tpPolys.length)return;
+ const features=[];
+ for(let i=0;i<tpPolys.length;i++){
+  const poly=tpPolys[i];
+  const computed=tpRows.filter(r=>r.poly===i+1);
+  poly.ring.forEach((coord,j)=>{
+   const r=computed[j];
+   if(!r)throw Error('Missing calculated point attributes');
+   features.push({type:'Feature',properties:{
+    polygon_id:i+1,polygon_name:poly.name,
+    point_name:r.from,next_point:r.to,
+    utm_zone:r.zone,utm_easting:r.x,utm_northing:r.y,
+    true_bearing_deg:r.trueb,magnetic_bearing_deg:r.mag,
+    distance_to_next_m:r.distance,
+    magnetic_declination_deg:Number(tp('tpDecl').value)
+   },geometry:{type:'Point',coordinates:[coord[0],coord[1]]}});
+  });
+ }
+ const output={type:'FeatureCollection',name:'Turning Points',features};
+ tpDownload(JSON.stringify(output,null,2),'turning_points.geojson','application/geo+json;charset=utf-8');
+};
+tp('tpKml').onclick=()=>{let k='<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>';tpPolys.forEach((p,i)=>{k+=`<Folder><name>${escXml(p.name)}</name><Placemark><name>${escXml(p.name)}</name><Polygon><outerBoundaryIs><LinearRing><coordinates>${[...p.ring,p.ring[0]].map(v=>v.join(',')+',0').join(' ')}</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>`;p.ring.forEach((v,j)=>{k+=`<Placemark><name>${j?'TP'+j:'SP'}</name><Point><coordinates>${v.join(',')},0</coordinates></Point></Placemark>`});k+='</Folder>'});tpDownload(k+'</Document></kml>','turning_points.kml','application/vnd.google-earth.kml+xml')};
+tp('tpSend').onclick=()=>{if(!tpPolys.length)return;const zones=[...new Set(tpPolys.map(p=>p.zone))];if(zones.length!==1||![36,37].includes(zones[0])){tp('tpStatus').className='status warn';tp('tpStatus').textContent=lang==='uk'?'Для передачі всі полігони повинні бути в одній UTM-зоні 36N або 37N. Оберіть її у списку.':'Choose one UTM zone (36N or 37N) for all polygons before transfer.';return;}zone.value=String(zones[0]);decl.value=String(tp('tpDecl').value);points=new Map();polygons=tpPolys.map((p,i)=>({id:i+1,points:new Map(p.ring.map((v,j)=>{const xy=tpUtm(...v,p.zone),name=j?'TP'+j:'SP';return [name,{name,x:xy.x,y:xy.y}]}))}));siteName.value=tpPolys.length===1?tpPolys[0].name:'';validate();calculate();mapState.fit=true;generate.disabled=false;preview.hidden=false;setLoadedStatus();switchTab('calc');render();};
+tp('tpPrint').onclick=()=>{if(!tpPolys.length)return;const old=document.title;document.title='Turning Points Map';const svg=tp('tpMap').querySelector('svg');if(!svg)return;const w=window.open('','_blank');if(!w){alert('Allow pop-ups to print the map');return;}w.document.write('<!doctype html><html><head><title>Turning Points Map</title><style>@page{size:A4 landscape;margin:8mm}body{font-family:Arial;margin:0}svg{width:100%;height:180mm}h2{margin:0 0 8px}</style></head><body><h2>Turning Points Map</h2>'+svg.outerHTML+'</body></html>');w.document.close();w.onload=()=>w.print();};
+window.addEventListener('resize',()=>{if(tpPolys.length&&!tp('turningPanel').hidden)tpRenderMap()});
+
+</script></body></html>
